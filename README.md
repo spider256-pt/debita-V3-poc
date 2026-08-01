@@ -13,46 +13,11 @@ The testing suite was built using **Foundry** to simulate a rigorous mainnet env
 * [cite_start]**State Manipulation & Pranking:** Utilized `vm.startPrank` and `vm.startBroadcast` to test complex access control modifiers (e.g., `onlyOwner` and `onlyAuctions`) and bypass Foundry's default EOA limitations[cite: 84, 480].
 * [cite_start]**Integration Testing:** Verified pagination mechanics (`offset` and `limit`) across active and historical state ledgers[cite: 257, 494].
 
----
-
-## 🚨 Vulnerabilities & Findings
-
-During the development of the Proof of Concept (PoC) tests, several vulnerabilities and architectural quirks were identified:
-
-### 1. [Critical] State Variable Shadowing in `changeOwner`
-[cite_start]The `changeOwner` function contains a severe shadowing bug that renders it completely non-functional[cite: 55]. 
-* [cite_start]**Details:** The parameter `address owner` shadows the state variable `owner`[cite: 56]. [cite_start]Because of this, the `require(msg.sender == owner)` statement checks if the caller is the address passed in the argument, not the actual contract owner[cite: 57]. [cite_start]The assignment `owner = owner;` simply assigns the parameter to itself, leaving the contract state permanently unchanged[cite: 58].
-
-### 2. [High] Arithmetic Underflow in Pagination Logic
-[cite_start]Both the `getActiveAuctionOrders` and `getHistoricalAuctions` functions are susceptible to arithmetic underflows[cite: 60].
-* [cite_start]**Details:** When the contract initializes the memory array to return the data, it uses the logic `new DutchAuction_veNFT.dutchAuction_INFO[](length - offset)`[cite: 25, 280]. [cite_start]If a user queries an offset that is larger than the limit or the total array length, this subtraction causes an underflow panic in Solidity ^0.8.0, breaking front-end integrations[cite: 61, 280].
-
-### 3. [Medium] Access Control Flaw in `_deleteAuctionOrder`
-A subtle logic flaw allows any registered auction to delete competitor auctions from the active registry.
-* [cite_start]**Details:** The function signature is `_deleteAuctionOrder(address _AuctionOrder) external onlyAuctions`[cite: 30]. [cite_start]The `onlyAuctions` modifier only verifies that the `msg.sender` is *a* registered auction[cite: 429]. [cite_start]It never verifies that `msg.sender == _AuctionOrder`[cite: 429]. [cite_start]Consequently, any active auction technically possesses the permission to delete any other active auction from the tracking array[cite: 430].
-
-### 4. [Info] State Mismatch on Auction Deletion
-[cite_start]When an auction is deleted via `_deleteAuctionOrder`, it is successfully removed from the `allActiveAuctionOrders` array[cite: 32]. However, the contract never sets `isAuction[_AuctionOrder] = false;`[cite: 419]. [cite_start]The deleted auction remains permanently marked as a valid auction in the boolean mapping[cite: 420].
-
----
-
-## 💻 How to Run the Tests
-
-To run this testing suite locally, ensure you have [Foundry](https://book.getfoundry.sh/) installed.
-
-1. **Clone the repository:**
-   `git clone <YOUR_REPO_URL>`
-2. **Install dependencies:**
-   `forge install`
-3. **Run the test suite:**
-   `forge test -vvv`
-
----
 
 ## 📜 License
 This project respects the original `SPDX-License-Identifier: MIT` license of the Debita V3 protocol. The test files and mock contracts provided here are open-source and available for educational use.
 
-
+---
 
 # AuctionFactory
 
