@@ -55,40 +55,26 @@ contract FuzzTestingOrders is Test {
             address(loanInstance)
         );
 
-        ownershipsContract.setDebitaContract(
-            address(DebitaV3AggregatorContract)
-        );
-        auctionFactoryDebitaContract.setAggregator(
-            address(DebitaV3AggregatorContract)
-        );
-        DLOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
-        DBOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
+        ownershipsContract.setDebitaContract(address(DebitaV3AggregatorContract));
+        auctionFactoryDebitaContract.setAggregator(address(DebitaV3AggregatorContract));
+        DLOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
+        DBOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
 
-        incentivesContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
+        incentivesContract.setAggregatorContract(address(DebitaV3AggregatorContract));
     }
 
     function testFuzzWithTwoOrders(
-        uint _lendAmountPerOrder,
-        uint _secondLendAmountPerOrder,
-        uint porcentageOfRatio,
-        uint secondPorcentageOfRatio
+        uint256 _lendAmountPerOrder,
+        uint256 _secondLendAmountPerOrder,
+        uint256 porcentageOfRatio,
+        uint256 secondPorcentageOfRatio
     ) public {
         vm.assume(
-            porcentageOfRatio <= 10000 &&
-                porcentageOfRatio > 0 &&
-                secondPorcentageOfRatio <= 10000 &&
-                secondPorcentageOfRatio > 0
+            porcentageOfRatio <= 10000 && porcentageOfRatio > 0 && secondPorcentageOfRatio <= 10000
+                && secondPorcentageOfRatio > 0
         );
         vm.assume(_lendAmountPerOrder > 0 && _secondLendAmountPerOrder > 0);
-        vm.assume(
-            _lendAmountPerOrder < 5e17 && _secondLendAmountPerOrder < 1e18
-        );
+        vm.assume(_lendAmountPerOrder < 5e17 && _secondLendAmountPerOrder < 1e18);
 
         address principle = AERO;
         address collateral = AERO;
@@ -96,64 +82,35 @@ contract FuzzTestingOrders is Test {
         address secondLender = address(0x01);
         address borrower = address(0x03);
 
-        uint lendAmountPerOrder = _lendAmountPerOrder;
-        uint secondLendAmountPerOrder = _secondLendAmountPerOrder;
+        uint256 lendAmountPerOrder = _lendAmountPerOrder;
+        uint256 secondLendAmountPerOrder = _secondLendAmountPerOrder;
 
-        uint porcentageOfRatioPerLendOrder = porcentageOfRatio;
-        uint secondPorcentageOfRatioPerLendOrder = secondPorcentageOfRatio;
+        uint256 porcentageOfRatioPerLendOrder = porcentageOfRatio;
+        uint256 secondPorcentageOfRatioPerLendOrder = secondPorcentageOfRatio;
 
         address[] memory lendOrders = allDynamicData.getDynamicAddressArray(2);
 
         createBorrowOrder(75e17, 1000, 86400, 100e18, AERO, AERO, borrower);
 
-        lendOrders[0] = createLendOrder(
-            5e17,
-            1000,
-            86400,
-            864000,
-            100e18,
-            principle,
-            collateral,
-            secondLender
-        );
+        lendOrders[0] = createLendOrder(5e17, 1000, 86400, 864000, 100e18, principle, collateral, secondLender);
 
-        lendOrders[1] = createLendOrder(
-            1e18,
-            1000,
-            86400,
-            864000,
-            100e18,
-            principle,
-            collateral,
-            secondLender
-        );
+        lendOrders[1] = createLendOrder(1e18, 1000, 86400, 864000, 100e18, principle, collateral, secondLender);
 
-        MatchOffers(
-            lendAmountPerOrder,
-            secondLendAmountPerOrder,
-            10000,
-            10000,
-            lendOrders,
-            principle
-        );
+        MatchOffers(lendAmountPerOrder, secondLendAmountPerOrder, 10000, 10000, lendOrders, principle);
     }
 
     function testFuzzCreateLendOrdersWithHigherInterest(
-        uint _lendAmountPerOrder,
-        uint _secondLendAmountPerOrder,
-        uint porcentageOfRatio,
-        uint secondPorcentageOfRatio
+        uint256 _lendAmountPerOrder,
+        uint256 _secondLendAmountPerOrder,
+        uint256 porcentageOfRatio,
+        uint256 secondPorcentageOfRatio
     ) public {
         vm.assume(
-            porcentageOfRatio <= 10000 &&
-                porcentageOfRatio > 0 &&
-                secondPorcentageOfRatio <= 10000 &&
-                secondPorcentageOfRatio > 0
+            porcentageOfRatio <= 10000 && porcentageOfRatio > 0 && secondPorcentageOfRatio <= 10000
+                && secondPorcentageOfRatio > 0
         );
         vm.assume(_lendAmountPerOrder > 0 && _secondLendAmountPerOrder > 0);
-        vm.assume(
-            _lendAmountPerOrder < 5e17 && _secondLendAmountPerOrder < 1e18
-        );
+        vm.assume(_lendAmountPerOrder < 5e17 && _secondLendAmountPerOrder < 1e18);
 
         address principle = AERO;
         address collateral = AERO;
@@ -161,51 +118,26 @@ contract FuzzTestingOrders is Test {
         address secondLender = address(0x01);
         address borrower = address(0x03);
 
-        uint lendAmountPerOrder = _lendAmountPerOrder;
-        uint secondLendAmountPerOrder = _secondLendAmountPerOrder;
+        uint256 lendAmountPerOrder = _lendAmountPerOrder;
+        uint256 secondLendAmountPerOrder = _secondLendAmountPerOrder;
 
         address[] memory lendOrders = allDynamicData.getDynamicAddressArray(2);
 
         createBorrowOrder(75e17, 1000, 86400, 100e18, AERO, AERO, borrower);
 
-        lendOrders[0] = createLendOrder(
-            75e17,
-            2000,
-            86400,
-            864000,
-            100e18,
-            principle,
-            collateral,
-            secondLender
-        );
+        lendOrders[0] = createLendOrder(75e17, 2000, 86400, 864000, 100e18, principle, collateral, secondLender);
 
-        lendOrders[1] = createLendOrder(
-            75e17,
-            2000,
-            86400,
-            864000,
-            100e18,
-            principle,
-            collateral,
-            secondLender
-        );
+        lendOrders[1] = createLendOrder(75e17, 2000, 86400, 864000, 100e18, principle, collateral, secondLender);
 
-        MatchOffers(
-            lendAmountPerOrder,
-            secondLendAmountPerOrder,
-            10000,
-            10000,
-            lendOrders,
-            principle
-        );
+        MatchOffers(lendAmountPerOrder, secondLendAmountPerOrder, 10000, 10000, lendOrders, principle);
     }
 
     function createLendOrder(
-        uint _ratio,
-        uint maxInterest,
-        uint minTime,
-        uint maxTime,
-        uint amountPrinciple,
+        uint256 _ratio,
+        uint256 maxInterest,
+        uint256 minTime,
+        uint256 maxTime,
+        uint256 amountPrinciple,
         address principle,
         address collateral,
         address lender
@@ -213,13 +145,11 @@ contract FuzzTestingOrders is Test {
         deal(principle, lender, amountPrinciple, false);
         IERC20(principle).approve(address(DLOFactoryContract), 1000e18);
         bool[] memory oraclesActivated = allDynamicData.getDynamicBoolArray(1);
-        uint[] memory ltvs = allDynamicData.getDynamicUintArray(1);
-        uint[] memory ratio = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ltvs = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ratio = allDynamicData.getDynamicUintArray(1);
 
-        address[] memory acceptedCollaterals = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory oraclesPrinciples = allDynamicData
-            .getDynamicAddressArray(1);
+        address[] memory acceptedCollaterals = allDynamicData.getDynamicAddressArray(1);
+        address[] memory oraclesPrinciples = allDynamicData.getDynamicAddressArray(1);
 
         ratio[0] = _ratio;
         oraclesPrinciples[0] = address(0x0);
@@ -246,10 +176,10 @@ contract FuzzTestingOrders is Test {
     }
 
     function createBorrowOrder(
-        uint _ratio,
-        uint maxInterest,
-        uint time,
-        uint amountCollateral,
+        uint256 _ratio,
+        uint256 maxInterest,
+        uint256 time,
+        uint256 amountCollateral,
         address principle,
         address collateral,
         address borrower
@@ -257,13 +187,11 @@ contract FuzzTestingOrders is Test {
         deal(collateral, borrower, amountCollateral, false);
         IERC20(collateral).approve(address(DBOFactoryContract), 1000e18);
         bool[] memory oraclesActivated = allDynamicData.getDynamicBoolArray(1);
-        uint[] memory ltvs = allDynamicData.getDynamicUintArray(1);
-        uint[] memory ratio = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ltvs = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ratio = allDynamicData.getDynamicUintArray(1);
 
-        address[] memory acceptedPrinciples = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory oraclesPrinciples = allDynamicData
-            .getDynamicAddressArray(1);
+        address[] memory acceptedPrinciples = allDynamicData.getDynamicAddressArray(1);
+        address[] memory oraclesPrinciples = allDynamicData.getDynamicAddressArray(1);
 
         ratio[0] = _ratio;
         oraclesPrinciples[0] = address(0x0);
@@ -289,25 +217,19 @@ contract FuzzTestingOrders is Test {
     }
 
     function MatchOffers(
-        uint _lendAmountPerOrder,
-        uint _secondAmountPerOrder,
-        uint _porcentageOfRatioPerLendOrder,
-        uint _porcentageOfRatioPerSecondLendOrder,
+        uint256 _lendAmountPerOrder,
+        uint256 _secondAmountPerOrder,
+        uint256 _porcentageOfRatioPerLendOrder,
+        uint256 _porcentageOfRatioPerSecondLendOrder,
         address[] memory lendOrders,
         address principle
     ) internal {
-        uint[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(
-            2
-        );
-        uint[] memory porcentageOfRatioPerLendOrder = allDynamicData
-            .getDynamicUintArray(2);
+        uint256[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(2);
+        uint256[] memory porcentageOfRatioPerLendOrder = allDynamicData.getDynamicUintArray(2);
         address[] memory principles = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory indexForPrinciple_BorrowOrder = allDynamicData
-            .getDynamicUintArray(2);
-        uint[] memory indexForCollateral_LendOrder = allDynamicData
-            .getDynamicUintArray(2);
-        uint[] memory indexPrinciple_LendOrder = allDynamicData
-            .getDynamicUintArray(2);
+        uint256[] memory indexForPrinciple_BorrowOrder = allDynamicData.getDynamicUintArray(2);
+        uint256[] memory indexForCollateral_LendOrder = allDynamicData.getDynamicUintArray(2);
+        uint256[] memory indexPrinciple_LendOrder = allDynamicData.getDynamicUintArray(2);
 
         lendAmountPerOrder[0] = _lendAmountPerOrder;
         lendAmountPerOrder[1] = _secondAmountPerOrder;

@@ -30,28 +30,15 @@ contract Auction is Test {
         factory = new auctionFactoryDebita();
         ABIERC721Contract = VotingEscrow(veAERO);
 
-        DebitaV3AggregatorContract = new DebitaV3Aggregator(
-            address(0x0),
-            address(0x0),
-            address(0x0),
-            address(0x0),
-            address(0x0),
-            address(0x0)
-        );
+        DebitaV3AggregatorContract =
+            new DebitaV3Aggregator(address(0x0), address(0x0), address(0x0), address(0x0), address(0x0), address(0x0));
         factory.setAggregator(address(DebitaV3AggregatorContract));
         vm.startPrank(signer);
 
         ERC20Mock(AERO).approve(address(ABIERC721Contract), 1000e18);
-        uint id = ABIERC721Contract.createLock(100e18, 365 * 4 * 86400);
+        uint256 id = ABIERC721Contract.createLock(100e18, 365 * 4 * 86400);
         ABIERC721Contract.approve(address(factory), id);
-        address _auction = factory.createAuction(
-            id,
-            veAERO,
-            AERO,
-            100e18,
-            10e18,
-            86400
-        );
+        address _auction = factory.createAuction(id, veAERO, AERO, 100e18, 10e18, 86400);
         auction = DutchAuction_veNFT(_auction);
         vm.stopPrank();
     }
@@ -59,17 +46,15 @@ contract Auction is Test {
     function testGetInfo() public {
         vm.startPrank(buyer);
         ERC20Mock(AERO).approve(address(auction), 100e18);
-        uint balanceBefore = ERC20Mock(AERO).balanceOf(signer);
-        uint balanceBeforeThisAddress = ERC20Mock(AERO).balanceOf(
-            address(this)
-        );
-        uint paymentAmount = auction.getCurrentPrice();
+        uint256 balanceBefore = ERC20Mock(AERO).balanceOf(signer);
+        uint256 balanceBeforeThisAddress = ERC20Mock(AERO).balanceOf(address(this));
+        uint256 paymentAmount = auction.getCurrentPrice();
         auction.buyNFT();
-        uint balanceAfter = ERC20Mock(AERO).balanceOf(signer);
-        uint balanceAfterThisAddress = ERC20Mock(AERO).balanceOf(address(this));
+        uint256 balanceAfter = ERC20Mock(AERO).balanceOf(signer);
+        uint256 balanceAfterThisAddress = ERC20Mock(AERO).balanceOf(address(this));
         vm.stopPrank();
-        uint publicFee = factory.publicAuctionFee();
-        uint fee = (paymentAmount * publicFee) / 10000;
+        uint256 publicFee = factory.publicAuctionFee();
+        uint256 fee = (paymentAmount * publicFee) / 10000;
         console.logUint(paymentAmount);
         assertEq(balanceBefore + paymentAmount - fee, balanceAfter);
         assertEq(balanceBeforeThisAddress + fee, balanceAfterThisAddress);
@@ -78,22 +63,19 @@ contract Auction is Test {
     function testRandomBuyDuringAuction() public {
         vm.startPrank(buyer);
         ERC20Mock(AERO).approve(address(auction), 100e18);
-        uint balanceBefore = ERC20Mock(AERO).balanceOf(signer);
-        uint balanceBeforeThisAddress = ERC20Mock(AERO).balanceOf(
-            address(this)
-        );
+        uint256 balanceBefore = ERC20Mock(AERO).balanceOf(signer);
+        uint256 balanceBeforeThisAddress = ERC20Mock(AERO).balanceOf(address(this));
         vm.warp(block.timestamp + 43200);
-        uint paymentAmount = auction.getCurrentPrice();
+        uint256 paymentAmount = auction.getCurrentPrice();
         auction.buyNFT();
-        uint balanceAfter = ERC20Mock(AERO).balanceOf(signer);
-        uint balanceAfterThisAddress = ERC20Mock(AERO).balanceOf(address(this));
+        uint256 balanceAfter = ERC20Mock(AERO).balanceOf(signer);
+        uint256 balanceAfterThisAddress = ERC20Mock(AERO).balanceOf(address(this));
         vm.stopPrank();
 
-        uint publicFee = factory.publicAuctionFee();
-        uint fee = (paymentAmount * publicFee) / 10000;
+        uint256 publicFee = factory.publicAuctionFee();
+        uint256 fee = (paymentAmount * publicFee) / 10000;
         // get auction info
-        DutchAuction_veNFT.dutchAuction_INFO memory m_currentAuction = auction
-            .getAuctionData();
+        DutchAuction_veNFT.dutchAuction_INFO memory m_currentAuction = auction.getAuctionData();
         assertEq(balanceBefore + paymentAmount - fee, balanceAfter);
         assertEq(balanceBeforeThisAddress + fee, balanceAfterThisAddress);
         assertEq(m_currentAuction.isActive, false);
@@ -104,27 +86,22 @@ contract Auction is Test {
     function testFloorPrice() public {
         vm.startPrank(buyer);
         ERC20Mock(AERO).approve(address(auction), 100e18);
-        uint balanceBefore = ERC20Mock(AERO).balanceOf(signer);
-        uint balanceBeforeThisAddress = ERC20Mock(AERO).balanceOf(
-            address(this)
-        );
+        uint256 balanceBefore = ERC20Mock(AERO).balanceOf(signer);
+        uint256 balanceBeforeThisAddress = ERC20Mock(AERO).balanceOf(address(this));
         vm.warp(block.timestamp + 86401);
-        uint paymentAmount = auction.getCurrentPrice();
+        uint256 paymentAmount = auction.getCurrentPrice();
         auction.buyNFT();
-        uint balanceAfter = ERC20Mock(AERO).balanceOf(signer);
-        uint balanceAfterThisAddress = ERC20Mock(AERO).balanceOf(address(this));
+        uint256 balanceAfter = ERC20Mock(AERO).balanceOf(signer);
+        uint256 balanceAfterThisAddress = ERC20Mock(AERO).balanceOf(address(this));
         vm.stopPrank();
 
-        uint publicFee = factory.publicAuctionFee();
-        uint fee = (paymentAmount * publicFee) / 10000;
+        uint256 publicFee = factory.publicAuctionFee();
+        uint256 fee = (paymentAmount * publicFee) / 10000;
         // get auction info
-        DutchAuction_veNFT.dutchAuction_INFO memory m_currentAuction = auction
-            .getAuctionData();
+        DutchAuction_veNFT.dutchAuction_INFO memory m_currentAuction = auction.getAuctionData();
 
         // get owner of veNFT
-        address owner = ABIERC721Contract.ownerOf(
-            m_currentAuction.nftCollateralID
-        );
+        address owner = ABIERC721Contract.ownerOf(m_currentAuction.nftCollateralID);
 
         assertEq(owner, buyer);
         assertEq(balanceBefore + paymentAmount - fee, balanceAfter);
@@ -136,30 +113,25 @@ contract Auction is Test {
 
     function testEditFloorPriceDuringAuction() public {
         // get current price
-        uint currentPrice = auction.getCurrentPrice();
+        uint256 currentPrice = auction.getCurrentPrice();
         // edit floor price
         vm.startPrank(signer);
         auction.editFloorPrice(5e18);
         vm.stopPrank();
         // get current price
-        uint newPrice = auction.getCurrentPrice();
+        uint256 newPrice = auction.getCurrentPrice();
 
         assertEq(currentPrice, newPrice);
     }
 
     function testCancelAuction() public {
-        DutchAuction_veNFT.dutchAuction_INFO[] memory auctionsBefore = factory
-            .getActiveAuctionOrders(0, 100);
+        DutchAuction_veNFT.dutchAuction_INFO[] memory auctionsBefore = factory.getActiveAuctionOrders(0, 100);
         vm.startPrank(signer);
         auction.cancelAuction();
         vm.stopPrank();
-        DutchAuction_veNFT.dutchAuction_INFO memory m_currentAuction = auction
-            .getAuctionData();
-        DutchAuction_veNFT.dutchAuction_INFO[] memory auctionsAfter = factory
-            .getActiveAuctionOrders(0, 100);
-        address owner = ABIERC721Contract.ownerOf(
-            m_currentAuction.nftCollateralID
-        );
+        DutchAuction_veNFT.dutchAuction_INFO memory m_currentAuction = auction.getAuctionData();
+        DutchAuction_veNFT.dutchAuction_INFO[] memory auctionsAfter = factory.getActiveAuctionOrders(0, 100);
+        address owner = ABIERC721Contract.ownerOf(m_currentAuction.nftCollateralID);
 
         assertEq(auctionsBefore.length, 1);
         assertEq(auctionsBefore[0].isActive, true);
@@ -174,18 +146,14 @@ contract Auction is Test {
         vm.warp(block.timestamp + 8640000);
         auction.editFloorPrice(5e18);
         // get auction info
-        DutchAuction_veNFT.dutchAuction_INFO memory m_currentAuction = auction
-            .getAuctionData();
+        DutchAuction_veNFT.dutchAuction_INFO memory m_currentAuction = auction.getAuctionData();
         vm.stopPrank();
-        uint currentPrice = auction.getCurrentPrice();
+        uint256 currentPrice = auction.getCurrentPrice();
 
         vm.warp(block.timestamp + 86400);
-        uint newPrice = auction.getCurrentPrice();
-        uint expectedDuration = (100e18 - 5e18) / m_currentAuction.tickPerBlock;
-        assertEq(
-            m_currentAuction.endBlock,
-            m_currentAuction.initialBlock + expectedDuration
-        );
+        uint256 newPrice = auction.getCurrentPrice();
+        uint256 expectedDuration = (100e18 - 5e18) / m_currentAuction.tickPerBlock;
+        assertEq(m_currentAuction.endBlock, m_currentAuction.initialBlock + expectedDuration);
         assertEq(newPrice, 5e18);
         assertEq(currentPrice > 10e18 && currentPrice < 101e17, true);
     }
@@ -194,16 +162,11 @@ contract Auction is Test {
         DutchAuction_veNFT secondAuction;
         DutchAuction_veNFT thirdAuction;
         vm.startPrank(secondSigner);
-        secondAuction = DutchAuction_veNFT(
-            createAuctionInternal(300e18, 15e18, 106400)
-        );
+        secondAuction = DutchAuction_veNFT(createAuctionInternal(300e18, 15e18, 106400));
 
-        thirdAuction = DutchAuction_veNFT(
-            createAuctionInternal(200e18, 10e18, 106400)
-        );
+        thirdAuction = DutchAuction_veNFT(createAuctionInternal(200e18, 10e18, 106400));
 
-        DutchAuction_veNFT.dutchAuction_INFO[] memory auctions = factory
-            .getActiveAuctionOrders(0, 100);
+        DutchAuction_veNFT.dutchAuction_INFO[] memory auctions = factory.getActiveAuctionOrders(0, 100);
 
         assertEq(auctions.length, 3);
         assertEq(auctions[0].initAmount, 100e18);
@@ -225,9 +188,7 @@ contract Auction is Test {
         assertEq(auctions[0].floorAmount, 10e18);
         assertEq(auctions[1].floorAmount, 10e18);
 
-        secondAuction = DutchAuction_veNFT(
-            createAuctionInternal(300e18, 15e18, 106400)
-        );
+        secondAuction = DutchAuction_veNFT(createAuctionInternal(300e18, 15e18, 106400));
 
         auctions = factory.getActiveAuctionOrders(0, 100);
 
@@ -237,8 +198,7 @@ contract Auction is Test {
         assertEq(auctions[2].initAmount, 300e18);
 
         secondAuction.cancelAuction();
-        DutchAuction_veNFT.dutchAuction_INFO[] memory historical = factory
-            .getHistoricalAuctions(0, 100);
+        DutchAuction_veNFT.dutchAuction_INFO[] memory historical = factory.getHistoricalAuctions(0, 100);
 
         assertEq(historical.length, 4);
 
@@ -252,32 +212,23 @@ contract Auction is Test {
         deal(USDC, buyer, 100e6, false);
         vm.startPrank(signer);
         ERC20Mock(AERO).approve(address(ABIERC721Contract), 100e18);
-        uint id = ABIERC721Contract.createLock(100e18, 365 * 4 * 86400);
+        uint256 id = ABIERC721Contract.createLock(100e18, 365 * 4 * 86400);
         ABIERC721Contract.approve(address(factory), id);
-        address _auction = factory.createAuction(
-            id,
-            veAERO,
-            USDC,
-            100e6,
-            10e6,
-            86400
-        );
+        address _auction = factory.createAuction(id, veAERO, USDC, 100e6, 10e6, 86400);
         DutchAuction_veNFT usdcAuction = DutchAuction_veNFT(_auction);
         vm.stopPrank();
         vm.warp(block.timestamp + 86401);
         vm.startPrank(buyer);
         ERC20Mock(USDC).approve(address(usdcAuction), 100e6);
-        uint balanceBefore = ERC20Mock(USDC).balanceOf(signer);
-        uint balanceBeforeThisAddress = ERC20Mock(USDC).balanceOf(
-            address(this)
-        );
-        uint paymentAmount = usdcAuction.getCurrentPrice();
+        uint256 balanceBefore = ERC20Mock(USDC).balanceOf(signer);
+        uint256 balanceBeforeThisAddress = ERC20Mock(USDC).balanceOf(address(this));
+        uint256 paymentAmount = usdcAuction.getCurrentPrice();
         usdcAuction.buyNFT();
-        uint balanceAfter = ERC20Mock(USDC).balanceOf(signer);
-        uint balanceAfterThisAddress = ERC20Mock(USDC).balanceOf(address(this));
+        uint256 balanceAfter = ERC20Mock(USDC).balanceOf(signer);
+        uint256 balanceAfterThisAddress = ERC20Mock(USDC).balanceOf(address(this));
         vm.stopPrank();
-        uint publicFee = factory.publicAuctionFee();
-        uint fee = (paymentAmount * publicFee) / 10000;
+        uint256 publicFee = factory.publicAuctionFee();
+        uint256 fee = (paymentAmount * publicFee) / 10000;
         assertEq(paymentAmount, 10e6);
         assertEq(balanceBefore + paymentAmount - fee, balanceAfter);
         assertEq(balanceBeforeThisAddress + fee, balanceAfterThisAddress);
@@ -290,16 +241,9 @@ contract Auction is Test {
         deal(USDC, buyer, 100e6, false);
         vm.startPrank(signer);
         ERC20Mock(AERO).approve(address(ABIERC721Contract), 100e18);
-        uint id = ABIERC721Contract.createLock(100e18, 365 * 4 * 86400);
+        uint256 id = ABIERC721Contract.createLock(100e18, 365 * 4 * 86400);
         ABIERC721Contract.approve(address(factory), id);
-        address _auction = factory.createAuction(
-            id,
-            veAERO,
-            USDC,
-            100e6,
-            10e6,
-            86400
-        );
+        address _auction = factory.createAuction(id, veAERO, USDC, 100e6, 10e6, 86400);
         DutchAuction_veNFT usdcAuction = DutchAuction_veNFT(_auction);
         vm.stopPrank();
         vm.warp(block.timestamp + 86401);
@@ -310,17 +254,15 @@ contract Auction is Test {
         vm.warp(block.timestamp + 106401);
         vm.startPrank(buyer);
         ERC20Mock(USDC).approve(address(usdcAuction), 100e6);
-        uint balanceBefore = ERC20Mock(USDC).balanceOf(signer);
-        uint balanceBeforeThisAddress = ERC20Mock(USDC).balanceOf(
-            address(this)
-        );
-        uint paymentAmount = usdcAuction.getCurrentPrice();
+        uint256 balanceBefore = ERC20Mock(USDC).balanceOf(signer);
+        uint256 balanceBeforeThisAddress = ERC20Mock(USDC).balanceOf(address(this));
+        uint256 paymentAmount = usdcAuction.getCurrentPrice();
         usdcAuction.buyNFT();
-        uint balanceAfter = ERC20Mock(USDC).balanceOf(signer);
-        uint balanceAfterThisAddress = ERC20Mock(USDC).balanceOf(address(this));
+        uint256 balanceAfter = ERC20Mock(USDC).balanceOf(signer);
+        uint256 balanceAfterThisAddress = ERC20Mock(USDC).balanceOf(address(this));
         vm.stopPrank();
-        uint publicFee = factory.publicAuctionFee();
-        uint fee = (paymentAmount * publicFee) / 10000;
+        uint256 publicFee = factory.publicAuctionFee();
+        uint256 fee = (paymentAmount * publicFee) / 10000;
 
         assertEq(paymentAmount, 5e6);
         assertEq(balanceBefore + paymentAmount - fee, balanceAfter);
@@ -334,54 +276,37 @@ contract Auction is Test {
         deal(USDC, buyer, 100e6, false);
         vm.startPrank(signer);
         ERC20Mock(AERO).approve(address(ABIERC721Contract), 100e18);
-        uint id = ABIERC721Contract.createLock(100e18, 365 * 4 * 86400);
+        uint256 id = ABIERC721Contract.createLock(100e18, 365 * 4 * 86400);
         ABIERC721Contract.approve(address(factory), id);
-        address _auction = factory.createAuction(
-            id,
-            veAERO,
-            USDC,
-            100e6,
-            10e6,
-            86400
-        );
+        address _auction = factory.createAuction(id, veAERO, USDC, 100e6, 10e6, 86400);
         DutchAuction_veNFT usdcAuction = DutchAuction_veNFT(_auction);
         vm.stopPrank();
         vm.warp(block.timestamp + 43200);
         vm.startPrank(buyer);
         ERC20Mock(USDC).approve(address(usdcAuction), 100e6);
-        uint balanceBefore = ERC20Mock(USDC).balanceOf(signer);
-        uint balanceBeforeThisAddress = ERC20Mock(USDC).balanceOf(
-            address(this)
-        );
-        uint paymentAmount = usdcAuction.getCurrentPrice();
+        uint256 balanceBefore = ERC20Mock(USDC).balanceOf(signer);
+        uint256 balanceBeforeThisAddress = ERC20Mock(USDC).balanceOf(address(this));
+        uint256 paymentAmount = usdcAuction.getCurrentPrice();
         usdcAuction.buyNFT();
-        uint balanceAfter = ERC20Mock(USDC).balanceOf(signer);
-        uint balanceAfterThisAddress = ERC20Mock(USDC).balanceOf(address(this));
+        uint256 balanceAfter = ERC20Mock(USDC).balanceOf(signer);
+        uint256 balanceAfterThisAddress = ERC20Mock(USDC).balanceOf(address(this));
         vm.stopPrank();
-        uint publicFee = factory.publicAuctionFee();
-        uint fee = (paymentAmount * publicFee) / 10000;
+        uint256 publicFee = factory.publicAuctionFee();
+        uint256 fee = (paymentAmount * publicFee) / 10000;
         assertEq(paymentAmount > 55e6 && paymentAmount < 551e15, true);
         assertEq(balanceBefore + paymentAmount - fee, balanceAfter);
         assertEq(balanceBeforeThisAddress + fee, balanceAfterThisAddress);
     }
 
-    function createAuctionInternal(
-        uint initAmount,
-        uint floorAmount,
-        uint timelapse
-    ) internal returns (address) {
+    function createAuctionInternal(uint256 initAmount, uint256 floorAmount, uint256 timelapse)
+        internal
+        returns (address)
+    {
         deal(AERO, secondSigner, 1000e18, false);
         ERC20Mock(AERO).approve(address(ABIERC721Contract), 1000e18);
-        uint id = ABIERC721Contract.createLock(100e18, 365 * 4 * 86400);
+        uint256 id = ABIERC721Contract.createLock(100e18, 365 * 4 * 86400);
         ABIERC721Contract.approve(address(factory), id);
-        address _auction = factory.createAuction(
-            id,
-            veAERO,
-            AERO,
-            initAmount,
-            floorAmount,
-            timelapse
-        );
+        address _auction = factory.createAuction(id, veAERO, AERO, initAmount, floorAmount, timelapse);
         return _auction;
     }
 }

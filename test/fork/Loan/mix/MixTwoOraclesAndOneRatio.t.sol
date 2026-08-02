@@ -56,7 +56,7 @@ contract testMultiplePrinciples is Test {
 
     address feeAddress = address(this);
 
-    uint receiptID;
+    uint256 receiptID;
 
     function setUp() public {
         allDynamicData = new DynamicData();
@@ -81,26 +81,13 @@ contract testMultiplePrinciples is Test {
             address(loanInstance)
         );
 
-        ownershipsContract.setDebitaContract(
-            address(DebitaV3AggregatorContract)
-        );
-        auctionFactoryDebitaContract.setAggregator(
-            address(DebitaV3AggregatorContract)
-        );
-        DLOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
-        DBOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
+        ownershipsContract.setDebitaContract(address(DebitaV3AggregatorContract));
+        auctionFactoryDebitaContract.setAggregator(address(DebitaV3AggregatorContract));
+        DLOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
+        DBOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
 
-        incentivesContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
-        DebitaV3AggregatorContract.setValidNFTCollateral(
-            address(receiptContract),
-            true
-        );
+        incentivesContract.setAggregatorContract(address(DebitaV3AggregatorContract));
+        DebitaV3AggregatorContract.setValidNFTCollateral(address(receiptContract), true);
 
         deal(AERO, firstLender, 1000e18, false);
         deal(AERO, secondLender, 1000e18, false);
@@ -114,21 +101,16 @@ contract testMultiplePrinciples is Test {
         IERC20(AERO).approve(address(DBOFactoryContract), 100e18);
 
         bool[] memory oraclesActivated = allDynamicData.getDynamicBoolArray(2);
-        uint[] memory ltvs = allDynamicData.getDynamicUintArray(2);
-        uint[] memory ratio = allDynamicData.getDynamicUintArray(2);
-        uint[] memory ratioLenders = allDynamicData.getDynamicUintArray(1);
-        uint[] memory ltvsLenders = allDynamicData.getDynamicUintArray(1);
-        bool[] memory oraclesActivatedLenders = allDynamicData
-            .getDynamicBoolArray(1);
+        uint256[] memory ltvs = allDynamicData.getDynamicUintArray(2);
+        uint256[] memory ratio = allDynamicData.getDynamicUintArray(2);
+        uint256[] memory ratioLenders = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ltvsLenders = allDynamicData.getDynamicUintArray(1);
+        bool[] memory oraclesActivatedLenders = allDynamicData.getDynamicBoolArray(1);
 
-        address[] memory acceptedPrinciples = allDynamicData
-            .getDynamicAddressArray(2);
-        address[] memory acceptedCollaterals = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory oraclesCollateral = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory oraclesPrinciples = allDynamicData
-            .getDynamicAddressArray(2);
+        address[] memory acceptedPrinciples = allDynamicData.getDynamicAddressArray(2);
+        address[] memory acceptedCollaterals = allDynamicData.getDynamicAddressArray(1);
+        address[] memory oraclesCollateral = allDynamicData.getDynamicAddressArray(1);
+        address[] memory oraclesPrinciples = allDynamicData.getDynamicAddressArray(2);
 
         ltvs[0] = 5000;
         acceptedPrinciples[0] = AERO;
@@ -234,7 +216,7 @@ contract testMultiplePrinciples is Test {
 
     function testOffers() public {
         matchOffers();
-        uint[] memory indexes = allDynamicData.getDynamicUintArray(3);
+        uint256[] memory indexes = allDynamicData.getDynamicUintArray(3);
         indexes[0] = 0;
         indexes[1] = 1;
         indexes[2] = 2;
@@ -247,67 +229,56 @@ contract testMultiplePrinciples is Test {
         DebitaV3LoanContract.claimCollateralAsBorrower(indexes);
         vm.stopPrank();
 
-        uint balanceBeforeFirstLender = AEROContract.balanceOf(firstLender);
+        uint256 balanceBeforeFirstLender = AEROContract.balanceOf(firstLender);
         vm.prank(firstLender);
         DebitaV3LoanContract.claimDebt(0);
-        uint balanceAfterFirstLender = AEROContract.balanceOf(firstLender);
+        uint256 balanceAfterFirstLender = AEROContract.balanceOf(firstLender);
 
-        uint balanceBeforeSecondLender = wETHContract.balanceOf(secondLender);
+        uint256 balanceBeforeSecondLender = wETHContract.balanceOf(secondLender);
         vm.prank(secondLender);
         DebitaV3LoanContract.claimDebt(1);
-        uint balanceAfterSecondLender = wETHContract.balanceOf(secondLender);
+        uint256 balanceAfterSecondLender = wETHContract.balanceOf(secondLender);
 
-        uint balanceBeforeThirdLender = wETHContract.balanceOf(thirdLender);
+        uint256 balanceBeforeThirdLender = wETHContract.balanceOf(thirdLender);
         vm.prank(thirdLender);
         DebitaV3LoanContract.claimDebt(2);
-        uint balanceAfterThirdLender = wETHContract.balanceOf(thirdLender);
+        uint256 balanceAfterThirdLender = wETHContract.balanceOf(thirdLender);
 
-        uint amountFirstLender = 25e17;
-        uint interestFirstLender = calculateInterest(0);
-        uint feeFirstLender = (interestFirstLender * 1500) / 10000;
+        uint256 amountFirstLender = 25e17;
+        uint256 interestFirstLender = calculateInterest(0);
+        uint256 feeFirstLender = (interestFirstLender * 1500) / 10000;
 
-        uint amountSecondLender = 38e17;
-        uint interestSecondLender = calculateInterest(1);
-        uint feeSecondLender = (interestSecondLender * 1500) / 10000;
+        uint256 amountSecondLender = 38e17;
+        uint256 interestSecondLender = calculateInterest(1);
+        uint256 feeSecondLender = (interestSecondLender * 1500) / 10000;
 
-        uint amountThirdLender = 20e17;
-        uint interestThirdLender = calculateInterest(2);
-        uint feeThirdLender = (interestThirdLender * 1500) / 10000;
+        uint256 amountThirdLender = 20e17;
+        uint256 interestThirdLender = calculateInterest(2);
+        uint256 feeThirdLender = (interestThirdLender * 1500) / 10000;
 
         assertEq(
             balanceAfterThirdLender,
-            balanceBeforeThirdLender +
-                amountThirdLender +
-                interestThirdLender -
-                feeThirdLender,
+            balanceBeforeThirdLender + amountThirdLender + interestThirdLender - feeThirdLender,
             "Third lender balance"
         );
 
         assertEq(
             balanceAfterSecondLender,
-            balanceBeforeSecondLender +
-                amountSecondLender +
-                interestSecondLender -
-                feeSecondLender,
+            balanceBeforeSecondLender + amountSecondLender + interestSecondLender - feeSecondLender,
             "Second lender balance"
         );
 
         assertEq(
             balanceAfterFirstLender,
-            balanceBeforeFirstLender +
-                amountFirstLender +
-                interestFirstLender -
-                feeFirstLender,
+            balanceBeforeFirstLender + amountFirstLender + interestFirstLender - feeFirstLender,
             "First lender balance"
         );
     }
 
     function testPartialDefault() public {
         matchOffers();
-        DebitaV3Loan.infoOfOffers[] memory offers = DebitaV3LoanContract
-            .getLoanData()
-            ._acceptedOffers;
-        uint[] memory indexes = allDynamicData.getDynamicUintArray(1);
+        DebitaV3Loan.infoOfOffers[] memory offers = DebitaV3LoanContract.getLoanData()._acceptedOffers;
+        uint256[] memory indexes = allDynamicData.getDynamicUintArray(1);
         vm.startPrank(borrower);
         deal(wETH, borrower, 10e18, false);
         wETHContract.approve(address(DebitaV3LoanContract), 10e18);
@@ -315,12 +286,12 @@ contract testMultiplePrinciples is Test {
         DebitaV3LoanContract.payDebt(indexes);
         vm.stopPrank();
 
-        uint balanceBeforeFirstLender = AEROContract.balanceOf(firstLender);
+        uint256 balanceBeforeFirstLender = AEROContract.balanceOf(firstLender);
         vm.prank(firstLender);
         DebitaV3LoanContract.claimDebt(0);
-        uint balanceAfterFirstLender = AEROContract.balanceOf(firstLender);
-        uint interest = calculateInterest(0);
-        uint fee = (interest * 1500) / 10000;
+        uint256 balanceAfterFirstLender = AEROContract.balanceOf(firstLender);
+        uint256 interest = calculateInterest(0);
+        uint256 fee = (interest * 1500) / 10000;
 
         vm.warp(block.timestamp + 9640001);
         vm.expectRevert();
@@ -336,56 +307,39 @@ contract testMultiplePrinciples is Test {
         vm.expectRevert();
         DebitaV3LoanContract.claimCollateralAsBorrower(indexes);
 
-        uint balanceBeforeSecondLender = USDCContract.balanceOf(secondLender);
+        uint256 balanceBeforeSecondLender = USDCContract.balanceOf(secondLender);
         vm.prank(secondLender);
         DebitaV3LoanContract.claimCollateralAsLender(1);
-        uint balanceAfterSecondLender = USDCContract.balanceOf(secondLender);
+        uint256 balanceAfterSecondLender = USDCContract.balanceOf(secondLender);
 
-        uint balanceBeforeThirdLender = USDCContract.balanceOf(thirdLender);
+        uint256 balanceBeforeThirdLender = USDCContract.balanceOf(thirdLender);
         vm.prank(thirdLender);
         DebitaV3LoanContract.claimCollateralAsLender(2);
-        uint balanceAfterThirdLender = USDCContract.balanceOf(thirdLender);
+        uint256 balanceAfterThirdLender = USDCContract.balanceOf(thirdLender);
 
-        uint collateralUsedSecondOrder = offers[1].collateralUsed;
-        uint collateralUsedThirdOrder = offers[2].collateralUsed;
-        assertEq(
-            balanceBeforeFirstLender + interest - fee + 25e17,
-            balanceAfterFirstLender
-        );
-        assertEq(
-            balanceBeforeSecondLender + collateralUsedSecondOrder,
-            balanceAfterSecondLender
-        );
-        assertEq(
-            balanceBeforeThirdLender + collateralUsedThirdOrder,
-            balanceAfterThirdLender
-        );
+        uint256 collateralUsedSecondOrder = offers[1].collateralUsed;
+        uint256 collateralUsedThirdOrder = offers[2].collateralUsed;
+        assertEq(balanceBeforeFirstLender + interest - fee + 25e17, balanceAfterFirstLender);
+        assertEq(balanceBeforeSecondLender + collateralUsedSecondOrder, balanceAfterSecondLender);
+        assertEq(balanceBeforeThirdLender + collateralUsedThirdOrder, balanceAfterThirdLender);
     }
 
-    function calculateInterest(uint index) internal returns (uint) {
-        DebitaV3Loan.infoOfOffers memory offer = DebitaV3LoanContract
-            .getLoanData()
-            ._acceptedOffers[index];
-        uint anualInterest = (offer.principleAmount * offer.apr) / 10000;
-        uint activeTime = (BorrowOrder.getBorrowInfo().duration * 1000) / 10000;
-        uint interestUsed = (anualInterest * activeTime) / 31536000;
+    function calculateInterest(uint256 index) internal returns (uint256) {
+        DebitaV3Loan.infoOfOffers memory offer = DebitaV3LoanContract.getLoanData()._acceptedOffers[index];
+        uint256 anualInterest = (offer.principleAmount * offer.apr) / 10000;
+        uint256 activeTime = (BorrowOrder.getBorrowInfo().duration * 1000) / 10000;
+        uint256 interestUsed = (anualInterest * activeTime) / 31536000;
         return interestUsed;
     }
 
     function matchOffers() public {
         address[] memory lendOrders = allDynamicData.getDynamicAddressArray(3);
-        uint[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(
-            3
-        );
-        uint[] memory porcentageOfRatioPerLendOrder = allDynamicData
-            .getDynamicUintArray(3);
+        uint256[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(3);
+        uint256[] memory porcentageOfRatioPerLendOrder = allDynamicData.getDynamicUintArray(3);
         address[] memory principles = allDynamicData.getDynamicAddressArray(2);
-        uint[] memory indexForPrinciple_BorrowOrder = allDynamicData
-            .getDynamicUintArray(3);
-        uint[] memory indexForCollateral_LendOrder = allDynamicData
-            .getDynamicUintArray(3);
-        uint[] memory indexPrinciple_LendOrder = allDynamicData
-            .getDynamicUintArray(3);
+        uint256[] memory indexForPrinciple_BorrowOrder = allDynamicData.getDynamicUintArray(3);
+        uint256[] memory indexForCollateral_LendOrder = allDynamicData.getDynamicUintArray(3);
+        uint256[] memory indexPrinciple_LendOrder = allDynamicData.getDynamicUintArray(3);
 
         lendOrders[0] = address(LendOrder);
         lendAmountPerOrder[0] = 25e17;
@@ -424,14 +378,8 @@ contract testMultiplePrinciples is Test {
     }
 
     function setOracles() internal {
-        DebitaChainlink oracle = new DebitaChainlink(
-            0xBCF85224fc0756B9Fa45aA7892530B47e10b6433,
-            address(this)
-        );
-        DebitaPyth oracle2 = new DebitaPyth(
-            0x8250f4aF4B972684F7b336503E2D6dFeDeB1487a,
-            address(this)
-        );
+        DebitaChainlink oracle = new DebitaChainlink(0xBCF85224fc0756B9Fa45aA7892530B47e10b6433, address(this));
+        DebitaPyth oracle2 = new DebitaPyth(0x8250f4aF4B972684F7b336503E2D6dFeDeB1487a, address(this));
 
         DebitaV3AggregatorContract.setOracleEnabled(address(oracle), true);
         DebitaV3AggregatorContract.setOracleEnabled(address(oracle2), true);
@@ -440,19 +388,10 @@ contract testMultiplePrinciples is Test {
         oracle.setPriceFeeds(USDC, USDCFEED);
         oracle.setPriceFeeds(wETH, WETHFEED);
 
-        oracle2.setPriceFeeds(
-            AERO,
-            0x9db37f4d5654aad3e37e2e14ffd8d53265fb3026d1d8f91146539eebaa2ef45f
-        );
-        oracle2.setPriceFeeds(
-            USDC,
-            0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a
-        );
+        oracle2.setPriceFeeds(AERO, 0x9db37f4d5654aad3e37e2e14ffd8d53265fb3026d1d8f91146539eebaa2ef45f);
+        oracle2.setPriceFeeds(USDC, 0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a);
 
-        oracle2.setPriceFeeds(
-            wETH,
-            0x9d4294bbcd1174d6f2003ec365831e64cc31d9f6f15a2b85399db8d5000960f6
-        );
+        oracle2.setPriceFeeds(wETH, 0x9d4294bbcd1174d6f2003ec365831e64cc31d9f6f15a2b85399db8d5000960f6);
 
         DebitaChainlinkOracle = address(oracle);
         DebitaPythOracle = address(oracle2);

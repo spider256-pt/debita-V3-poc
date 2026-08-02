@@ -50,7 +50,7 @@ contract DebitaAggregatorTest is Test, DynamicData {
     address borrower = address(0x02);
     address lender = address(this);
 
-    uint receiptID;
+    uint256 receiptID;
 
     function setUp() public {
         receiptContract = new veNFTAerodrome(veAERO, AERO);
@@ -75,35 +75,22 @@ contract DebitaAggregatorTest is Test, DynamicData {
             address(loanInstance)
         );
 
-        ownershipsContract.setDebitaContract(
-            address(DebitaV3AggregatorContract)
-        );
-        auctionFactoryDebitaContract.setAggregator(
-            address(DebitaV3AggregatorContract)
-        );
-        DLOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
-        DBOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
+        ownershipsContract.setDebitaContract(address(DebitaV3AggregatorContract));
+        auctionFactoryDebitaContract.setAggregator(address(DebitaV3AggregatorContract));
+        DLOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
+        DBOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
 
-        incentivesContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
-        DebitaV3AggregatorContract.setValidNFTCollateral(
-            address(receiptContract),
-            true
-        );
+        incentivesContract.setAggregatorContract(address(DebitaV3AggregatorContract));
+        DebitaV3AggregatorContract.setValidNFTCollateral(address(receiptContract), true);
         deal(AERO, lender, 1000e18, false);
         deal(AERO, borrower, 1000e18, false);
         setOracles();
 
         vm.startPrank(borrower);
         IERC20(AERO).approve(address(ABIERC721Contract), 100e18);
-        uint id = ABIERC721Contract.createLock(10e18, 365 * 4 * 86400);
+        uint256 id = ABIERC721Contract.createLock(10e18, 365 * 4 * 86400);
         ABIERC721Contract.approve(address(receiptContract), id);
-        uint[] memory nftID = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory nftID = allDynamicData.getDynamicUintArray(1);
         nftID[0] = id;
         receiptContract.deposit(nftID);
 
@@ -112,15 +99,12 @@ contract DebitaAggregatorTest is Test, DynamicData {
         IERC20(AERO).approve(address(DBOFactoryContract), 100e18);
 
         bool[] memory oraclesActivated = allDynamicData.getDynamicBoolArray(1);
-        uint[] memory ltvs = allDynamicData.getDynamicUintArray(1);
-        uint[] memory ratio = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ltvs = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ratio = allDynamicData.getDynamicUintArray(1);
 
-        address[] memory acceptedPrinciples = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory acceptedCollaterals = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory oraclesPrinciples = allDynamicData
-            .getDynamicAddressArray(1);
+        address[] memory acceptedPrinciples = allDynamicData.getDynamicAddressArray(1);
+        address[] memory acceptedCollaterals = allDynamicData.getDynamicAddressArray(1);
+        address[] memory oraclesPrinciples = allDynamicData.getDynamicAddressArray(1);
 
         oraclesPrinciples[0] = DebitaChainlinkOracle;
         acceptedPrinciples[0] = AERO;
@@ -169,7 +153,7 @@ contract DebitaAggregatorTest is Test, DynamicData {
         MatchOffers();
         checkValues(0);
 
-        uint[] memory indexes = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexes = allDynamicData.getDynamicUintArray(1);
         indexes[0] = 0;
         vm.startPrank(borrower);
         AEROContract.approve(address(DebitaV3LoanContract), 100e18);
@@ -182,15 +166,15 @@ contract DebitaAggregatorTest is Test, DynamicData {
         vm.stopPrank();
 
         // claim Debt
-        uint balanceBefore = AEROContract.balanceOf(lender);
+        uint256 balanceBefore = AEROContract.balanceOf(lender);
         DebitaV3LoanContract.claimDebt(0);
-        uint balanceAfter = AEROContract.balanceOf(lender);
+        uint256 balanceAfter = AEROContract.balanceOf(lender);
 
         // 1000 is the apr of borrow order
-        uint anualInterest = (5e18 * 1000) / 10000;
+        uint256 anualInterest = (5e18 * 1000) / 10000;
         // 86400 is 10% of 864000
-        uint interestToPay = (anualInterest * 86400) / 31536000;
-        uint fee = (interestToPay * 1500) / 10000;
+        uint256 interestToPay = (anualInterest * 86400) / 31536000;
+        uint256 fee = (interestToPay * 1500) / 10000;
         assertEq(balanceBefore + 5e18 + interestToPay - fee, balanceAfter);
         assertEq(ownerBefore, address(DebitaV3LoanContract));
         assertEq(ownerAfter, borrower);
@@ -198,7 +182,7 @@ contract DebitaAggregatorTest is Test, DynamicData {
 
     function testExtendedLoan() public {
         MatchOffers();
-        uint[] memory indexes = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexes = allDynamicData.getDynamicUintArray(1);
         indexes[0] = 0;
         vm.startPrank(borrower);
 
@@ -206,8 +190,8 @@ contract DebitaAggregatorTest is Test, DynamicData {
         vm.warp(block.timestamp + 96400);
         DebitaV3LoanContract.extendLoan();
         vm.warp(block.timestamp + 8530000);
-        uint actualBlock = block.timestamp;
-        uint interestToPay = calculateInterest(0);
+        uint256 actualBlock = block.timestamp;
+        uint256 interestToPay = calculateInterest(0);
 
         DebitaV3LoanContract.payDebt(indexes);
 
@@ -217,16 +201,15 @@ contract DebitaAggregatorTest is Test, DynamicData {
         address ownerAfter = receiptContract.ownerOf(receiptID);
         vm.stopPrank();
 
-        uint balanceBefore = AEROContract.balanceOf(lender);
+        uint256 balanceBefore = AEROContract.balanceOf(lender);
         DebitaV3LoanContract.claimDebt(0);
-        uint balanceAfter = AEROContract.balanceOf(lender);
+        uint256 balanceAfter = AEROContract.balanceOf(lender);
 
         // 1000 is the apr of borrow order
-        uint anualInterest = (5e18 * 1000) / 10000;
+        uint256 anualInterest = (5e18 * 1000) / 10000;
         // 86400 is 10% of 864000
-        DebitaV3Loan.LoanData memory _loanData = DebitaV3LoanContract
-            .getLoanData();
-        uint fee = (interestToPay * 1500) / 10000;
+        DebitaV3Loan.LoanData memory _loanData = DebitaV3LoanContract.getLoanData();
+        uint256 fee = (interestToPay * 1500) / 10000;
         assertEq(balanceBefore + 5e18 + interestToPay - fee, balanceAfter);
         assertEq(ownerBefore, address(DebitaV3LoanContract));
         assertEq(ownerAfter, borrower);
@@ -235,7 +218,7 @@ contract DebitaAggregatorTest is Test, DynamicData {
     function testDefaultLoan() public {
         MatchOffers();
 
-        uint[] memory indexes = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexes = allDynamicData.getDynamicUintArray(1);
         indexes[0] = 0;
         vm.startPrank(borrower);
         AEROContract.approve(address(DebitaV3LoanContract), 100e18);
@@ -255,15 +238,12 @@ contract DebitaAggregatorTest is Test, DynamicData {
 
     function testDefaultAndAuctionCall() public {
         MatchOffers();
-        uint[] memory indexes = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexes = allDynamicData.getDynamicUintArray(1);
         indexes[0] = 0;
         vm.warp(block.timestamp + 8640010);
         DebitaV3LoanContract.createAuctionForCollateral(0);
-        DutchAuction_veNFT auction = DutchAuction_veNFT(
-            DebitaV3LoanContract.getAuctionData().auctionAddress
-        );
-        DutchAuction_veNFT.dutchAuction_INFO memory auctionData = auction
-            .getAuctionData();
+        DutchAuction_veNFT auction = DutchAuction_veNFT(DebitaV3LoanContract.getAuctionData().auctionAddress);
+        DutchAuction_veNFT.dutchAuction_INFO memory auctionData = auction.getAuctionData();
 
         vm.warp(block.timestamp + (86400 * 10) + 1);
 
@@ -277,10 +257,10 @@ contract DebitaAggregatorTest is Test, DynamicData {
         address ownerOfNFT = receiptContract.ownerOf(receiptID);
 
         // claim sold Amount
-        uint balanceBefore = AEROContract.balanceOf(lender);
+        uint256 balanceBefore = AEROContract.balanceOf(lender);
         DebitaV3LoanContract.claimCollateralAsLender(0);
-        uint balanceAfter = AEROContract.balanceOf(lender);
-        uint fee = (15e17 * 200) / 10000;
+        uint256 balanceAfter = AEROContract.balanceOf(lender);
+        uint256 fee = (15e17 * 200) / 10000;
         assertEq(balanceBefore + 15e17 - fee, balanceAfter);
         assertEq(ownerOfNFT, buyer);
         assertEq(auctionData.initAmount, 10e18);
@@ -298,8 +278,8 @@ contract DebitaAggregatorTest is Test, DynamicData {
     }
 
     function testEditOrders() public {
-        uint[] memory newLTVs = allDynamicData.getDynamicUintArray(1);
-        uint[] memory newRatios = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory newLTVs = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory newRatios = allDynamicData.getDynamicUintArray(1);
         newLTVs[0] = 10000;
         LendOrder.updateLendOrder(1000, 8640000, 86400, newLTVs, newRatios);
         vm.warp(block.timestamp + 86400);
@@ -322,17 +302,17 @@ contract DebitaAggregatorTest is Test, DynamicData {
 
     function testEditBorrowOrders() public {
         /*
-        function updateBorrowOrder(
-        uint newMaxApr,
-        uint newDuration,
-        uint[] memory newLTVs,
-        uint[] memory newRatios
-    )
-     
-      */
+            function updateBorrowOrder(
+            uint newMaxApr,
+            uint newDuration,
+            uint[] memory newLTVs,
+            uint[] memory newRatios
+        )
+
+          */
         vm.startPrank(borrower);
-        uint[] memory newLTVs = allDynamicData.getDynamicUintArray(1);
-        uint[] memory newRatios = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory newLTVs = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory newRatios = allDynamicData.getDynamicUintArray(1);
         newLTVs[0] = 10000;
         BorrowOrder.updateBorrowOrder(1000, 864000, newLTVs, newRatios);
         vm.warp(block.timestamp + 86400);
@@ -362,18 +342,12 @@ contract DebitaAggregatorTest is Test, DynamicData {
 
     function MatchShouldRevert() internal {
         address[] memory lendOrders = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(
-            1
-        );
-        uint[] memory porcentageOfRatioPerLendOrder = allDynamicData
-            .getDynamicUintArray(1);
+        uint256[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory porcentageOfRatioPerLendOrder = allDynamicData.getDynamicUintArray(1);
         address[] memory principles = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory indexForPrinciple_BorrowOrder = allDynamicData
-            .getDynamicUintArray(1);
-        uint[] memory indexForCollateral_LendOrder = allDynamicData
-            .getDynamicUintArray(1);
-        uint[] memory indexPrinciple_LendOrder = allDynamicData
-            .getDynamicUintArray(1);
+        uint256[] memory indexForPrinciple_BorrowOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexForCollateral_LendOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexPrinciple_LendOrder = allDynamicData.getDynamicUintArray(1);
         indexForPrinciple_BorrowOrder[0] = 0;
         indexForCollateral_LendOrder[0] = 0;
         indexPrinciple_LendOrder[0] = 0;
@@ -400,18 +374,12 @@ contract DebitaAggregatorTest is Test, DynamicData {
 
     function MatchOffers() internal {
         address[] memory lendOrders = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(
-            1
-        );
-        uint[] memory porcentageOfRatioPerLendOrder = allDynamicData
-            .getDynamicUintArray(1);
+        uint256[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory porcentageOfRatioPerLendOrder = allDynamicData.getDynamicUintArray(1);
         address[] memory principles = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory indexForPrinciple_BorrowOrder = allDynamicData
-            .getDynamicUintArray(1);
-        uint[] memory indexForCollateral_LendOrder = allDynamicData
-            .getDynamicUintArray(1);
-        uint[] memory indexPrinciple_LendOrder = allDynamicData
-            .getDynamicUintArray(1);
+        uint256[] memory indexForPrinciple_BorrowOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexForCollateral_LendOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexPrinciple_LendOrder = allDynamicData.getDynamicUintArray(1);
         indexForPrinciple_BorrowOrder[0] = 0;
         indexForCollateral_LendOrder[0] = 0;
         indexPrinciple_LendOrder[0] = 0;
@@ -435,51 +403,37 @@ contract DebitaAggregatorTest is Test, DynamicData {
         DebitaV3LoanContract = DebitaV3Loan(loan);
     }
 
-    function checkValues(uint index) internal {
-        DebitaV3Loan.LoanData memory _loanData = DebitaV3LoanContract
-            .getLoanData();
+    function checkValues(uint256 index) internal {
+        DebitaV3Loan.LoanData memory _loanData = DebitaV3LoanContract.getLoanData();
 
         // get borrow info
 
-        DBOImplementation.BorrowInfo memory borrowInfo = BorrowOrder
-            .getBorrowInfo();
+        DBOImplementation.BorrowInfo memory borrowInfo = BorrowOrder.getBorrowInfo();
 
         DebitaChainlink oracle = DebitaChainlink(DebitaChainlinkOracle);
         address principle = _loanData._acceptedOffers[index].principle;
 
-        uint priceColalteral = uint(
-            oracle.getThePrice(_loanData.valuableCollateralAsset)
-        );
-        uint pricePrinciple = uint(oracle.getThePrice(principle));
+        uint256 priceColalteral = uint256(oracle.getThePrice(_loanData.valuableCollateralAsset));
+        uint256 pricePrinciple = uint256(oracle.getThePrice(principle));
 
-        uint amountOFCollateral = _loanData
-            ._acceptedOffers[index]
-            .collateralUsed;
-        uint amountOfPrinciple = _loanData
-            ._acceptedOffers[index]
-            .principleAmount;
+        uint256 amountOFCollateral = _loanData._acceptedOffers[index].collateralUsed;
+        uint256 amountOfPrinciple = _loanData._acceptedOffers[index].principleAmount;
 
-        uint decimalsCollateral = ERC20Mock(_loanData.valuableCollateralAsset)
-            .decimals();
-        uint decimalsPrinciple = ERC20Mock(principle).decimals();
+        uint256 decimalsCollateral = ERC20Mock(_loanData.valuableCollateralAsset).decimals();
+        uint256 decimalsPrinciple = ERC20Mock(principle).decimals();
 
-        uint valueOfCollateral = (priceColalteral * amountOFCollateral) /
-            10 ** decimalsCollateral;
-        uint valueOfPrinciple = (pricePrinciple * amountOfPrinciple) /
-            10 ** decimalsPrinciple;
+        uint256 valueOfCollateral = (priceColalteral * amountOFCollateral) / 10 ** decimalsCollateral;
+        uint256 valueOfPrinciple = (pricePrinciple * amountOfPrinciple) / 10 ** decimalsPrinciple;
 
-        uint LTV = (valueOfPrinciple * 10000) / valueOfCollateral;
-        uint NeintyEightPorcent = (borrowInfo.LTVs[0] * 9800) / 10000;
-        uint HundredTwoPorcent = (borrowInfo.LTVs[0] * 10200) / 10000;
+        uint256 LTV = (valueOfPrinciple * 10000) / valueOfCollateral;
+        uint256 NeintyEightPorcent = (borrowInfo.LTVs[0] * 9800) / 10000;
+        uint256 HundredTwoPorcent = (borrowInfo.LTVs[0] * 10200) / 10000;
 
         assertEq(LTV >= NeintyEightPorcent && LTV <= HundredTwoPorcent, true);
     }
 
     function setOracles() internal {
-        DebitaChainlink oracle = new DebitaChainlink(
-            0xBCF85224fc0756B9Fa45aA7892530B47e10b6433,
-            address(this)
-        );
+        DebitaChainlink oracle = new DebitaChainlink(0xBCF85224fc0756B9Fa45aA7892530B47e10b6433, address(this));
         DebitaPyth oracle2 = new DebitaPyth(address(0x0), address(0x0));
         DebitaV3AggregatorContract.setOracleEnabled(address(oracle), true);
         DebitaV3AggregatorContract.setOracleEnabled(address(oracle2), true);
@@ -489,7 +443,8 @@ contract DebitaAggregatorTest is Test, DynamicData {
         DebitaChainlinkOracle = address(oracle);
         DebitaPythOracle = address(oracle2);
     }
-    function calculateInterest(uint index) internal returns (uint) {
+
+    function calculateInterest(uint256 index) internal returns (uint256) {
         return DebitaV3LoanContract.calculateInterestToPay(index);
     }
 }

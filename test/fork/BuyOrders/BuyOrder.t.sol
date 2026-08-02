@@ -26,7 +26,8 @@ contract BuyOrderTest is Test {
     address buyer = address(0x02);
     address veAERO = 0xeBf418Fe2512e7E6bd9b87a8F0f294aCDC67e6B4;
     address AERO = 0x940181a94A35A4569E4529A3CDfB74e38FD98631;
-    uint receiptID;
+    uint256 receiptID;
+
     function setUp() public {
         deal(AERO, seller, 100e18, false);
         deal(AERO, buyer, 100e18, false);
@@ -40,10 +41,10 @@ contract BuyOrderTest is Test {
         ABIERC721Contract = VotingEscrow(veAERO);
         vm.startPrank(seller);
         ERC20Mock(AERO).approve(address(ABIERC721Contract), 1000e18);
-        uint veNFTID = ABIERC721Contract.createLock(100e18, 365 * 4 * 86400);
+        uint256 veNFTID = ABIERC721Contract.createLock(100e18, 365 * 4 * 86400);
 
         ABIERC721Contract.approve(address(receiptContract), veNFTID);
-        uint[] memory nftID = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory nftID = allDynamicData.getDynamicUintArray(1);
         nftID[0] = veNFTID;
         receiptContract.deposit(nftID);
         receiptID = receiptContract.lastReceiptID();
@@ -52,12 +53,7 @@ contract BuyOrderTest is Test {
 
         vm.startPrank(buyer);
         AEROContract.approve(address(factory), 1000e18);
-        address _buyOrderAddress = factory.createBuyOrder(
-            AERO,
-            address(receiptContract),
-            100e18,
-            7e17
-        );
+        address _buyOrderAddress = factory.createBuyOrder(AERO, address(receiptContract), 100e18, 7e17);
         buyOrderContract = BuyOrder(_buyOrderAddress);
 
         vm.stopPrank();
@@ -90,13 +86,13 @@ contract BuyOrderTest is Test {
     function testSellReceipt() public {
         vm.startPrank(seller);
         receiptContract.approve(address(buyOrderContract), receiptID);
-        uint balanceBeforeAero = AEROContract.balanceOf(seller);
+        uint256 balanceBeforeAero = AEROContract.balanceOf(seller);
         buyOrderContract.sellNFT(receiptID);
-        uint balanceAfterAero = AEROContract.balanceOf(seller);
+        uint256 balanceAfterAero = AEROContract.balanceOf(seller);
         vm.stopPrank();
         BuyOrder.BuyInfo memory buyInfo = buyOrderContract.getBuyInfo();
 
-        uint fee = (70e18 * 50) / 10000;
+        uint256 fee = (70e18 * 50) / 10000;
         assertEq(buyInfo.capturedAmount, 100e18);
         assertEq(buyInfo.availableAmount, 100e18 - 70e18);
         assertEq(balanceBeforeAero + 70e18 - fee, balanceAfterAero);
@@ -110,9 +106,9 @@ contract BuyOrderTest is Test {
 
         vm.startPrank(buyer);
 
-        uint balanceBeforeAero = AEROContract.balanceOf(buyer);
+        uint256 balanceBeforeAero = AEROContract.balanceOf(buyer);
         buyOrderContract.deleteBuyOrder();
-        uint balanceAfterAero = AEROContract.balanceOf(buyer);
+        uint256 balanceAfterAero = AEROContract.balanceOf(buyer);
         BuyOrder.BuyInfo memory buyInfo = buyOrderContract.getBuyInfo();
         vm.stopPrank();
 
@@ -137,10 +133,10 @@ contract BuyOrderTest is Test {
         vm.startPrank(seller);
         deal(AERO, seller, 1000e18, false);
         ERC20Mock(AERO).approve(address(ABIERC721Contract), 1000e18);
-        uint veNFTID = ABIERC721Contract.createLock(1000e18, 365 * 4 * 86400);
+        uint256 veNFTID = ABIERC721Contract.createLock(1000e18, 365 * 4 * 86400);
 
         ABIERC721Contract.approve(address(receiptContract), veNFTID);
-        uint[] memory nftID = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory nftID = allDynamicData.getDynamicUintArray(1);
         nftID[0] = veNFTID;
         receiptContract.deposit(nftID);
         receiptID = receiptContract.lastReceiptID();

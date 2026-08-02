@@ -13,8 +13,8 @@ contract CounterTest is Test {
     veNFTVault[] public veNFTVaultContract = new veNFTVault[](3);
     ERC20Mock public TOKEN;
     address[] vaultAddress = new address[](3);
-    uint[] nftID = new uint[](3);
-    uint[] receiptID = new uint[](3);
+    uint256[] nftID = new uint256[](3);
+    uint256[] receiptID = new uint256[](3);
 
     address veAERO = 0xeBf418Fe2512e7E6bd9b87a8F0f294aCDC67e6B4;
     address AERO = 0x940181a94A35A4569E4529A3CDfB74e38FD98631;
@@ -27,15 +27,15 @@ contract CounterTest is Test {
         deal(AERO, address(this), 1000e18, true);
         TOKEN.approve(address(ABIERC721Contract), 1000e18);
 
-        for (uint i = 0; i < 3; i++) {
-            uint id = ABIERC721Contract.createLock(100e18, 365 * 4 * 86400);
+        for (uint256 i = 0; i < 3; i++) {
+            uint256 id = ABIERC721Contract.createLock(100e18, 365 * 4 * 86400);
             ABIERC721Contract.approve(address(receiptContract), id);
             nftID[i] = id;
         }
 
         receiptContract.deposit(nftID);
 
-        for (uint i = 0; i < 3; i++) {
+        for (uint256 i = 0; i < 3; i++) {
             receiptID[i] = receiptContract.lastReceiptID() - 2 + i;
             address vault = receiptContract.s_ReceiptID_to_Vault(receiptID[i]);
             vaultAddress[i] = vault;
@@ -113,12 +113,12 @@ contract CounterTest is Test {
     }
 
     function testWithdrawAndDepositAgain() public {
-        uint[] memory newNFTID = getDynamicUintArray(20);
+        uint256[] memory newNFTID = getDynamicUintArray(20);
         address[] memory _vaultAddress = getDynamicAddressArray(20);
         veNFTVault[] memory _veNFTVaultContract = new veNFTVault[](20);
-        uint[] memory _receiptID = new uint[](20);
-        for (uint i = 0; i < 20; i++) {
-            uint id = ABIERC721Contract.createLock(1e18, 365 * 4 * 86400);
+        uint256[] memory _receiptID = new uint256[](20);
+        for (uint256 i = 0; i < 20; i++) {
+            uint256 id = ABIERC721Contract.createLock(1e18, 365 * 4 * 86400);
             ABIERC721Contract.approve(address(receiptContract), id);
 
             newNFTID[i] = id;
@@ -126,7 +126,7 @@ contract CounterTest is Test {
 
         receiptContract.deposit(newNFTID);
 
-        for (uint i = 0; i < 20; i++) {
+        for (uint256 i = 0; i < 20; i++) {
             _receiptID[i] = receiptContract.lastReceiptID() - 19 + i;
             address vault = receiptContract.s_ReceiptID_to_Vault(_receiptID[i]);
             _vaultAddress[i] = vault;
@@ -139,32 +139,21 @@ contract CounterTest is Test {
         receiptContract.approve(address(_veNFTVaultContract[6]), _receiptID[6]);
         _veNFTVaultContract[6].withdraw();
 
-        receiptContract.approve(
-            address(_veNFTVaultContract[19]),
-            _receiptID[19]
-        );
+        receiptContract.approve(address(_veNFTVaultContract[19]), _receiptID[19]);
         _veNFTVaultContract[19].withdraw();
 
-        veNFTAerodrome.receiptInstance[]
-            memory receiptCalculated = receiptContract.getDataFromUser(
-                address(this),
-                0,
-                1000
-            );
+        veNFTAerodrome.receiptInstance[] memory receiptCalculated =
+            receiptContract.getDataFromUser(address(this), 0, 1000);
 
         assertEq(receiptCalculated[0].decimals, 18);
     }
 
-    function getDynamicUintArray(
-        uint256 x
-    ) public pure returns (uint[] memory) {
-        uint[] memory nftsID = new uint[](x);
+    function getDynamicUintArray(uint256 x) public pure returns (uint256[] memory) {
+        uint256[] memory nftsID = new uint256[](x);
         return nftsID;
     }
 
-    function getDynamicAddressArray(
-        uint256 x
-    ) public pure returns (address[] memory) {
+    function getDynamicAddressArray(uint256 x) public pure returns (address[] memory) {
         address[] memory nftsID = new address[](x);
         return nftsID;
     }

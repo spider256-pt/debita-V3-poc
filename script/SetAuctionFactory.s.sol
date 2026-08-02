@@ -27,6 +27,7 @@ contract DeploymentScript is Script {
 
     DLOImplementation public LendOrder;
     DBOImplementation public BorrowOrder;
+
     function run() public {
         //   ownershipsContract = new Ownerships();
         //    incentivesContract = new DebitaIncentives();
@@ -34,25 +35,21 @@ contract DeploymentScript is Script {
         DBOFactoryContract = new DBOFactory(address(borrowOrderImplementation));
         DLOImplementation proxyImplementation = new DLOImplementation();
         DLOFactoryContract = new DLOFactory(address(proxyImplementation));
-        auctionFactoryDebitaContract = auctionFactoryDebita(
-            0xd1e6bAB276475172b0E8D128695700864cBf1de6
-        );
+        auctionFactoryDebitaContract = auctionFactoryDebita(0xd1e6bAB276475172b0E8D128695700864cBf1de6);
         /*    DebitaV3Loan loanInstance = new DebitaV3Loan();
-DebitaV3AggregatorContract = new DebitaV3Aggregator(
-address(DBOFactoryContract),
-            address(DLOFactoryContract),
-            address(incentivesContract),
-            address(ownershipsContract),
-            address(auctionFactoryDebitaContract),
-address(loanInstance)
-);*/
+        DebitaV3AggregatorContract = new DebitaV3Aggregator(
+        address(DBOFactoryContract),
+                    address(DLOFactoryContract),
+                    address(incentivesContract),
+                    address(ownershipsContract),
+                    address(auctionFactoryDebitaContract),
+        address(loanInstance)
+        );*/
 
         /*ownershipsContract.setDebitaContract(
             address(DebitaV3AggregatorContract)
         ); */
-        auctionFactoryDebitaContract.setAggregator(
-            address(DebitaV3AggregatorContract)
-        );
+        auctionFactoryDebitaContract.setAggregator(address(DebitaV3AggregatorContract));
         /*  DLOFactoryContract.setAggregatorContract(
             address(DebitaV3AggregatorContract)
         );

@@ -43,6 +43,7 @@ contract TestTaxTokensReceipts is Test {
     ERC20Mock token;
 
     TaxTokensReceipts public receiptContract;
+
     function setUp() public {
         allDynamicData = new DynamicData();
         ownershipsContract = new Ownerships();
@@ -64,19 +65,14 @@ contract TestTaxTokensReceipts is Test {
             address(auctionFactoryDebitaContract),
             address(loanInstance)
         );
-        receiptContract = new TaxTokensReceipts(
-            fBomb,
-            address(dbFactory),
-            address(dlFactory),
-            address(aggregator)
-        );
+        receiptContract = new TaxTokensReceipts(fBomb, address(dbFactory), address(dlFactory), address(aggregator));
         deal(fBomb, buyer, 100e18, true);
     }
 
     function testDepositAndWithdraw() public {
         vm.startPrank(buyer);
         token.approve(address(receiptContract), 1000e18);
-        uint tokenID = receiptContract.deposit(100e18);
+        uint256 tokenID = receiptContract.deposit(100e18);
         assertEq(token.balanceOf(address(receiptContract)), 100e18);
         assertEq(token.balanceOf(address(buyer)), 0);
 
@@ -91,7 +87,7 @@ contract TestTaxTokensReceipts is Test {
     function testTransferReceipts() public {
         vm.startPrank(buyer);
         token.approve(address(receiptContract), 1000e18);
-        uint tokenID = receiptContract.deposit(100e18);
+        uint256 tokenID = receiptContract.deposit(100e18);
         assertEq(receiptContract.balanceOf(buyer), 1);
 
         address newOwner = 0x5F35576Ae82553209224d85Bbe9657565ab16a4f;
@@ -108,36 +104,19 @@ contract TestTaxTokensReceipts is Test {
     function testCreateOrders() public {
         vm.startPrank(buyer);
         token.approve(address(receiptContract), 1000e18);
-        uint tokenID = receiptContract.deposit(100e18);
+        uint256 tokenID = receiptContract.deposit(100e18);
         assertEq(receiptContract.balanceOf(buyer), 1);
-        createBorrowOrder(
-            5e17,
-            4000,
-            tokenID,
-            864000,
-            1,
-            fBomb,
-            address(receiptContract),
-            buyer
-        );
+        createBorrowOrder(5e17, 4000, tokenID, 864000, 1, fBomb, address(receiptContract), buyer);
 
-        createLendOrder(
-            5e17,
-            4000,
-            864000,
-            864000,
-            100e18,
-            fBomb,
-            address(receiptContract),
-            buyer
-        );
+        createLendOrder(5e17, 4000, 864000, 864000, 100e18, fBomb, address(receiptContract), buyer);
     }
+
     function createLendOrder(
-        uint _ratio,
-        uint maxInterest,
-        uint minTime,
-        uint maxTime,
-        uint amountPrinciple,
+        uint256 _ratio,
+        uint256 maxInterest,
+        uint256 minTime,
+        uint256 maxTime,
+        uint256 amountPrinciple,
         address principle,
         address collateral,
         address lender
@@ -145,13 +124,11 @@ contract TestTaxTokensReceipts is Test {
         deal(principle, lender, amountPrinciple, false);
         IERC20(principle).approve(address(dlFactory), 1000e18);
         bool[] memory oraclesActivated = allDynamicData.getDynamicBoolArray(1);
-        uint[] memory ltvs = allDynamicData.getDynamicUintArray(1);
-        uint[] memory ratio = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ltvs = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ratio = allDynamicData.getDynamicUintArray(1);
 
-        address[] memory acceptedCollaterals = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory oraclesPrinciples = allDynamicData
-            .getDynamicAddressArray(1);
+        address[] memory acceptedCollaterals = allDynamicData.getDynamicAddressArray(1);
+        address[] memory oraclesPrinciples = allDynamicData.getDynamicAddressArray(1);
 
         ratio[0] = _ratio;
         oraclesPrinciples[0] = address(0x0);
@@ -176,25 +153,24 @@ contract TestTaxTokensReceipts is Test {
         );
         return lendOrderAddress;
     }
+
     function createBorrowOrder(
-        uint _ratio,
-        uint maxInterest,
-        uint tokenId,
-        uint time,
-        uint amountCollateral,
+        uint256 _ratio,
+        uint256 maxInterest,
+        uint256 tokenId,
+        uint256 time,
+        uint256 amountCollateral,
         address principle,
         address collateral,
         address borrower
     ) internal {
         IERC721(collateral).approve(address(dbFactory), tokenId);
         bool[] memory oraclesActivated = allDynamicData.getDynamicBoolArray(1);
-        uint[] memory ltvs = allDynamicData.getDynamicUintArray(1);
-        uint[] memory ratio = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ltvs = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ratio = allDynamicData.getDynamicUintArray(1);
 
-        address[] memory acceptedPrinciples = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory oraclesPrinciples = allDynamicData
-            .getDynamicAddressArray(1);
+        address[] memory acceptedPrinciples = allDynamicData.getDynamicAddressArray(1);
+        address[] memory oraclesPrinciples = allDynamicData.getDynamicAddressArray(1);
 
         ratio[0] = _ratio;
         oraclesPrinciples[0] = address(0x0);
@@ -221,18 +197,12 @@ contract TestTaxTokensReceipts is Test {
 
     function matchOffers() public {
         address[] memory lendOrders = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(
-            1
-        );
-        uint[] memory porcentageOfRatioPerLendOrder = allDynamicData
-            .getDynamicUintArray(1);
+        uint256[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory porcentageOfRatioPerLendOrder = allDynamicData.getDynamicUintArray(1);
         address[] memory principles = allDynamicData.getDynamicAddressArray(2);
-        uint[] memory indexForPrinciple_BorrowOrder = allDynamicData
-            .getDynamicUintArray(1);
-        uint[] memory indexForCollateral_LendOrder = allDynamicData
-            .getDynamicUintArray(1);
-        uint[] memory indexPrinciple_LendOrder = allDynamicData
-            .getDynamicUintArray(1);
+        uint256[] memory indexForPrinciple_BorrowOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexForCollateral_LendOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexPrinciple_LendOrder = allDynamicData.getDynamicUintArray(1);
 
         lendOrders[0] = address(LendOrder);
         lendAmountPerOrder[0] = 25e17;

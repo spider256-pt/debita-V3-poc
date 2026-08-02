@@ -44,7 +44,7 @@ contract TwoLendersERC20Loan is Test, DynamicData {
 
     address feeAddress = address(this);
 
-    uint receiptID;
+    uint256 receiptID;
 
     function setUp() public {
         allDynamicData = new DynamicData();
@@ -71,26 +71,13 @@ contract TwoLendersERC20Loan is Test, DynamicData {
         AERO = address(AEROContract);
         USDC = address(USDCContract);
 
-        ownershipsContract.setDebitaContract(
-            address(DebitaV3AggregatorContract)
-        );
-        auctionFactoryDebitaContract.setAggregator(
-            address(DebitaV3AggregatorContract)
-        );
-        DLOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
-        DBOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
+        ownershipsContract.setDebitaContract(address(DebitaV3AggregatorContract));
+        auctionFactoryDebitaContract.setAggregator(address(DebitaV3AggregatorContract));
+        DLOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
+        DBOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
 
-        incentivesContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
-        DebitaV3AggregatorContract.setValidNFTCollateral(
-            address(receiptContract),
-            true
-        );
+        incentivesContract.setAggregatorContract(address(DebitaV3AggregatorContract));
+        DebitaV3AggregatorContract.setValidNFTCollateral(address(receiptContract), true);
 
         deal(AERO, firstLender, 1000e18, false);
         deal(AERO, secondLender, 1000e18, false);
@@ -102,15 +89,12 @@ contract TwoLendersERC20Loan is Test, DynamicData {
         IERC20(AERO).approve(address(DBOFactoryContract), 100e18);
 
         bool[] memory oraclesActivated = allDynamicData.getDynamicBoolArray(1);
-        uint[] memory ltvs = allDynamicData.getDynamicUintArray(1);
-        uint[] memory ratio = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ltvs = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ratio = allDynamicData.getDynamicUintArray(1);
 
-        address[] memory acceptedPrinciples = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory acceptedCollaterals = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory oraclesPrinciples = allDynamicData
-            .getDynamicAddressArray(1);
+        address[] memory acceptedPrinciples = allDynamicData.getDynamicAddressArray(1);
+        address[] memory acceptedCollaterals = allDynamicData.getDynamicAddressArray(1);
+        address[] memory oraclesPrinciples = allDynamicData.getDynamicAddressArray(1);
 
         ratio[0] = 5e17;
         oraclesPrinciples[0] = address(0x0);
@@ -181,64 +165,52 @@ contract TwoLendersERC20Loan is Test, DynamicData {
 
     function testMultipleLenders() public {
         matchOffers();
-        DebitaV3Loan.LoanData memory loanData = DebitaV3LoanContract
-            .getLoanData();
-        uint[] memory indexes = allDynamicData.getDynamicUintArray(2);
+        DebitaV3Loan.LoanData memory loanData = DebitaV3LoanContract.getLoanData();
+        uint256[] memory indexes = allDynamicData.getDynamicUintArray(2);
         indexes[0] = 0;
         indexes[1] = 1;
         vm.startPrank(borrower);
         AEROContract.approve(address(DebitaV3LoanContract), 6e18);
         DebitaV3LoanContract.payDebt(indexes);
 
-        uint balanceBeforeBorrower = IERC20(USDC).balanceOf(borrower);
+        uint256 balanceBeforeBorrower = IERC20(USDC).balanceOf(borrower);
         DebitaV3LoanContract.claimCollateralAsBorrower(indexes);
-        uint balanceAfterBorrower = IERC20(USDC).balanceOf(borrower);
+        uint256 balanceAfterBorrower = IERC20(USDC).balanceOf(borrower);
 
         vm.stopPrank();
 
-        uint balanceBeforeFirstLender = IERC20(AERO).balanceOf(firstLender);
+        uint256 balanceBeforeFirstLender = IERC20(AERO).balanceOf(firstLender);
         vm.prank(firstLender);
         DebitaV3LoanContract.claimDebt(0);
-        uint balanceAfterFirstLender = IERC20(AERO).balanceOf(firstLender);
+        uint256 balanceAfterFirstLender = IERC20(AERO).balanceOf(firstLender);
 
-        uint balanceBeforeSecondLender = IERC20(AERO).balanceOf(secondLender);
+        uint256 balanceBeforeSecondLender = IERC20(AERO).balanceOf(secondLender);
         vm.prank(secondLender);
         DebitaV3LoanContract.claimDebt(1);
-        uint balanceAfterSecondLender = IERC20(AERO).balanceOf(secondLender);
+        uint256 balanceAfterSecondLender = IERC20(AERO).balanceOf(secondLender);
 
         console.logUint(loanData.valuableCollateralUsed);
 
         assertEq(
-            balanceBeforeBorrower + loanData.valuableCollateralUsed,
-            balanceAfterBorrower,
-            "Balance Borrower not equal"
+            balanceBeforeBorrower + loanData.valuableCollateralUsed, balanceAfterBorrower, "Balance Borrower not equal"
         );
         // 10%
-        uint anualInterest = (loanData._acceptedOffers[0].principleAmount *
-            loanData._acceptedOffers[0].apr) / 10000;
-        uint interest = (anualInterest * 86400) / 31536000;
-        uint feeAmountFirstLender = (interest * 1500) / 10000;
+        uint256 anualInterest = (loanData._acceptedOffers[0].principleAmount * loanData._acceptedOffers[0].apr) / 10000;
+        uint256 interest = (anualInterest * 86400) / 31536000;
+        uint256 feeAmountFirstLender = (interest * 1500) / 10000;
         assertEq(
-            balanceBeforeFirstLender +
-                loanData._acceptedOffers[0].principleAmount +
-                interest -
-                feeAmountFirstLender,
+            balanceBeforeFirstLender + loanData._acceptedOffers[0].principleAmount + interest - feeAmountFirstLender,
             balanceAfterFirstLender,
             "Balance First lender not equal"
         );
 
-        uint anualInterestSecondLender = (loanData
-            ._acceptedOffers[1]
-            .principleAmount * loanData._acceptedOffers[1].apr) / 10000;
-        uint interestAmountSecondLender = (anualInterestSecondLender * 86400) /
-            31536000;
-        uint feeAmountSecondLender = (interestAmountSecondLender * 1500) /
-            10000;
+        uint256 anualInterestSecondLender =
+            (loanData._acceptedOffers[1].principleAmount * loanData._acceptedOffers[1].apr) / 10000;
+        uint256 interestAmountSecondLender = (anualInterestSecondLender * 86400) / 31536000;
+        uint256 feeAmountSecondLender = (interestAmountSecondLender * 1500) / 10000;
         assertEq(
-            balanceBeforeSecondLender +
-                loanData._acceptedOffers[1].principleAmount +
-                interestAmountSecondLender -
-                feeAmountSecondLender,
+            balanceBeforeSecondLender + loanData._acceptedOffers[1].principleAmount + interestAmountSecondLender
+                - feeAmountSecondLender,
             balanceAfterSecondLender,
             "Balance Second lender not equal"
         );
@@ -246,11 +218,10 @@ contract TwoLendersERC20Loan is Test, DynamicData {
 
     function testFullDefault() public {
         matchOffers();
-        DebitaV3Loan.LoanData memory loanData = DebitaV3LoanContract
-            .getLoanData();
+        DebitaV3Loan.LoanData memory loanData = DebitaV3LoanContract.getLoanData();
         // next deadline
         vm.warp(block.timestamp + 8640010);
-        uint[] memory indexes = allDynamicData.getDynamicUintArray(2);
+        uint256[] memory indexes = allDynamicData.getDynamicUintArray(2);
         indexes[0] = 0;
         indexes[1] = 1;
         vm.startPrank(borrower);
@@ -280,38 +251,27 @@ contract TwoLendersERC20Loan is Test, DynamicData {
         DebitaV3LoanContract.claimCollateralAsLender(0);
 
         // claim collateral as lender
-        uint balanceBeforeFirstLender = IERC20(USDC).balanceOf(firstLender);
+        uint256 balanceBeforeFirstLender = IERC20(USDC).balanceOf(firstLender);
         vm.prank(firstLender);
         DebitaV3LoanContract.claimCollateralAsLender(0);
-        uint balanceAfterFirstLender = IERC20(USDC).balanceOf(firstLender);
+        uint256 balanceAfterFirstLender = IERC20(USDC).balanceOf(firstLender);
 
-        uint balanceBeforeSecondLender = IERC20(USDC).balanceOf(secondLender);
+        uint256 balanceBeforeSecondLender = IERC20(USDC).balanceOf(secondLender);
         vm.prank(secondLender);
         DebitaV3LoanContract.claimCollateralAsLender(1);
-        uint balanceAfterSecondLender = IERC20(USDC).balanceOf(secondLender);
+        uint256 balanceAfterSecondLender = IERC20(USDC).balanceOf(secondLender);
 
-        uint collateralUsedFirstLender = loanData
-            ._acceptedOffers[0]
-            .collateralUsed;
-        uint collateralUsedSecondLender = loanData
-            ._acceptedOffers[1]
-            .collateralUsed;
+        uint256 collateralUsedFirstLender = loanData._acceptedOffers[0].collateralUsed;
+        uint256 collateralUsedSecondLender = loanData._acceptedOffers[1].collateralUsed;
         assert(collateralUsedSecondLender > collateralUsedFirstLender);
-        assertEq(
-            balanceBeforeFirstLender + collateralUsedFirstLender,
-            balanceAfterFirstLender
-        );
-        assertEq(
-            balanceBeforeSecondLender + collateralUsedSecondLender,
-            balanceAfterSecondLender
-        );
+        assertEq(balanceBeforeFirstLender + collateralUsedFirstLender, balanceAfterFirstLender);
+        assertEq(balanceBeforeSecondLender + collateralUsedSecondLender, balanceAfterSecondLender);
     }
 
     function testPartialDefault() public {
         matchOffers();
-        DebitaV3Loan.LoanData memory loanData = DebitaV3LoanContract
-            .getLoanData();
-        uint[] memory indexes = allDynamicData.getDynamicUintArray(1);
+        DebitaV3Loan.LoanData memory loanData = DebitaV3LoanContract.getLoanData();
+        uint256[] memory indexes = allDynamicData.getDynamicUintArray(1);
         indexes[0] = 0;
 
         vm.startPrank(borrower);
@@ -319,15 +279,15 @@ contract TwoLendersERC20Loan is Test, DynamicData {
         DebitaV3LoanContract.payDebt(indexes);
         vm.stopPrank();
 
-        uint balanceBeforeBorrower = IERC20(USDC).balanceOf(borrower);
+        uint256 balanceBeforeBorrower = IERC20(USDC).balanceOf(borrower);
         vm.prank(borrower);
         DebitaV3LoanContract.claimCollateralAsBorrower(indexes);
-        uint balanceAfterBorrower = IERC20(USDC).balanceOf(borrower);
+        uint256 balanceAfterBorrower = IERC20(USDC).balanceOf(borrower);
 
-        uint balanceBeforeFirstLender = IERC20(AERO).balanceOf(firstLender);
+        uint256 balanceBeforeFirstLender = IERC20(AERO).balanceOf(firstLender);
         vm.prank(firstLender);
         DebitaV3LoanContract.claimDebt(0);
-        uint balanceAfterFirstLender = IERC20(AERO).balanceOf(firstLender);
+        uint256 balanceAfterFirstLender = IERC20(AERO).balanceOf(firstLender);
 
         vm.expectRevert();
         vm.prank(firstLender);
@@ -342,51 +302,35 @@ contract TwoLendersERC20Loan is Test, DynamicData {
         // deadline all loans
 
         vm.warp(block.timestamp + 9640010);
-        uint balanceBeforeSecondLender = IERC20(USDC).balanceOf(secondLender);
+        uint256 balanceBeforeSecondLender = IERC20(USDC).balanceOf(secondLender);
         vm.prank(secondLender);
         DebitaV3LoanContract.claimCollateralAsLender(1);
-        uint balanceAfterSecondLender = IERC20(USDC).balanceOf(secondLender);
+        uint256 balanceAfterSecondLender = IERC20(USDC).balanceOf(secondLender);
 
-        uint collateralUsedSecondLender = loanData
-            ._acceptedOffers[1]
-            .collateralUsed;
+        uint256 collateralUsedSecondLender = loanData._acceptedOffers[1].collateralUsed;
 
-        uint collateralUsedFirstLender = loanData
-            ._acceptedOffers[0]
-            .collateralUsed;
+        uint256 collateralUsedFirstLender = loanData._acceptedOffers[0].collateralUsed;
 
-        uint anualInterest = (loanData._acceptedOffers[0].principleAmount *
-            loanData._acceptedOffers[0].apr) / 10000;
-        uint firstLenderInterest = (anualInterest * 86400) / 31536000;
-        uint fee = (firstLenderInterest * 1500) / 10000;
+        uint256 anualInterest = (loanData._acceptedOffers[0].principleAmount * loanData._acceptedOffers[0].apr) / 10000;
+        uint256 firstLenderInterest = (anualInterest * 86400) / 31536000;
+        uint256 fee = (firstLenderInterest * 1500) / 10000;
 
         assertEq(
-            balanceBeforeFirstLender +
-                loanData._acceptedOffers[0].principleAmount +
-                firstLenderInterest -
-                fee,
+            balanceBeforeFirstLender + loanData._acceptedOffers[0].principleAmount + firstLenderInterest - fee,
             balanceAfterFirstLender
         );
-        assertEq(
-            balanceBeforeBorrower + collateralUsedFirstLender,
-            balanceAfterBorrower
-        );
-        assertEq(
-            balanceBeforeSecondLender + collateralUsedSecondLender,
-            balanceAfterSecondLender
-        );
+        assertEq(balanceBeforeBorrower + collateralUsedFirstLender, balanceAfterBorrower);
+        assertEq(balanceBeforeSecondLender + collateralUsedSecondLender, balanceAfterSecondLender);
     }
 
     function testCheckIncentivesWithTwoLenders() public {
         address[] memory principles = allDynamicData.getDynamicAddressArray(2);
         address[] memory collateral = allDynamicData.getDynamicAddressArray(2);
-        address[] memory incentiveToken = allDynamicData.getDynamicAddressArray(
-            2
-        );
+        address[] memory incentiveToken = allDynamicData.getDynamicAddressArray(2);
 
         bool[] memory isLend = allDynamicData.getDynamicBoolArray(2);
-        uint[] memory amount = allDynamicData.getDynamicUintArray(2);
-        uint[] memory epochs = allDynamicData.getDynamicUintArray(2);
+        uint256[] memory amount = allDynamicData.getDynamicUintArray(2);
+        uint256[] memory epochs = allDynamicData.getDynamicUintArray(2);
 
         principles[0] = AERO;
         collateral[0] = USDC;
@@ -402,86 +346,59 @@ contract TwoLendersERC20Loan is Test, DynamicData {
         amount[1] = 100e6;
         epochs[1] = 2;
 
-        address[] memory tokensUsedAsBribes = allDynamicData
-            .getDynamicAddressArray(1);
+        address[] memory tokensUsedAsBribes = allDynamicData.getDynamicAddressArray(1);
         tokensUsedAsBribes[0] = USDC;
         deal(AERO, address(this), 10000e18);
         deal(USDC, address(this), 10000e18);
 
         incentivesContract.whitelListCollateral(AERO, USDC, true);
         IERC20(USDC).approve(address(incentivesContract), 1000e18);
-        incentivesContract.incentivizePair(
-            principles,
-            incentiveToken,
-            isLend,
-            amount,
-            epochs
-        );
+        incentivesContract.incentivizePair(principles, incentiveToken, isLend, amount, epochs);
 
         vm.warp(block.timestamp + 15 days);
-        uint currentEpoch = incentivesContract.currentEpoch();
+        uint256 currentEpoch = incentivesContract.currentEpoch();
         matchOffers();
         vm.warp(block.timestamp + 30 days);
-        DebitaV3Loan.LoanData memory loanData = DebitaV3LoanContract
-            .getLoanData();
-        address[][] memory tokensIncentives = new address[][](
-            incentiveToken.length
-        );
+        DebitaV3Loan.LoanData memory loanData = DebitaV3LoanContract.getLoanData();
+        address[][] memory tokensIncentives = new address[][](incentiveToken.length);
 
         tokensIncentives[0] = tokensUsedAsBribes;
-        uint porcentageOfLending = (loanData
-            ._acceptedOffers[0]
-            .principleAmount * 10000) / 45e17;
-        uint porcentageOfLendingSecond = (loanData
-            ._acceptedOffers[1]
-            .principleAmount * 10000) / 45e17;
+        uint256 porcentageOfLending = (loanData._acceptedOffers[0].principleAmount * 10000) / 45e17;
+        uint256 porcentageOfLendingSecond = (loanData._acceptedOffers[1].principleAmount * 10000) / 45e17;
 
-        uint incentivesFirstLender = (100e6 * porcentageOfLending) / 10000;
-        uint incentivesSecondLender = (100e6 * porcentageOfLendingSecond) /
-            10000;
+        uint256 incentivesFirstLender = (100e6 * porcentageOfLending) / 10000;
+        uint256 incentivesSecondLender = (100e6 * porcentageOfLendingSecond) / 10000;
 
-        uint balanceBeforeFirstLender = IERC20(USDC).balanceOf(firstLender);
+        uint256 balanceBeforeFirstLender = IERC20(USDC).balanceOf(firstLender);
         vm.prank(firstLender);
         incentivesContract.claimIncentives(principles, tokensIncentives, 2);
-        uint balanceAfterFirstLender = IERC20(USDC).balanceOf(firstLender);
+        uint256 balanceAfterFirstLender = IERC20(USDC).balanceOf(firstLender);
 
-        uint balanceBeforeSecondLender = IERC20(USDC).balanceOf(secondLender);
+        uint256 balanceBeforeSecondLender = IERC20(USDC).balanceOf(secondLender);
         vm.prank(secondLender);
         incentivesContract.claimIncentives(principles, tokensIncentives, 2);
-        uint balanceAfterSecondLender = IERC20(USDC).balanceOf(secondLender);
+        uint256 balanceAfterSecondLender = IERC20(USDC).balanceOf(secondLender);
 
-        uint balanceBeforeBorrower = IERC20(USDC).balanceOf(borrower);
+        uint256 balanceBeforeBorrower = IERC20(USDC).balanceOf(borrower);
         vm.prank(borrower);
         incentivesContract.claimIncentives(principles, tokensIncentives, 2);
-        uint balanceAfterBorrower = IERC20(USDC).balanceOf(borrower);
+        uint256 balanceAfterBorrower = IERC20(USDC).balanceOf(borrower);
 
-        assertEq(
-            balanceBeforeSecondLender + incentivesSecondLender,
-            balanceAfterSecondLender
-        );
+        assertEq(balanceBeforeSecondLender + incentivesSecondLender, balanceAfterSecondLender);
 
-        assertEq(
-            balanceBeforeFirstLender + incentivesFirstLender,
-            balanceAfterFirstLender
-        );
+        assertEq(balanceBeforeFirstLender + incentivesFirstLender, balanceAfterFirstLender);
 
         assertEq(balanceBeforeBorrower + 100e6, balanceAfterBorrower);
     }
 
     function matchOffers() public {
         address[] memory lendOrders = allDynamicData.getDynamicAddressArray(2);
-        uint[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(
-            2
-        );
-        uint[] memory porcentageOfRatioPerLendOrder = allDynamicData
-            .getDynamicUintArray(2);
+        uint256[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(2);
+        uint256[] memory porcentageOfRatioPerLendOrder = allDynamicData.getDynamicUintArray(2);
         address[] memory principles = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory indexForPrinciple_BorrowOrder = allDynamicData
-            .getDynamicUintArray(2);
-        uint[] memory indexForCollateral_LendOrder = allDynamicData
-            .getDynamicUintArray(2);
-        uint[] memory indexPrinciple_LendOrder = allDynamicData
-            .getDynamicUintArray(2);
+        uint256[] memory indexForPrinciple_BorrowOrder = allDynamicData.getDynamicUintArray(2);
+        uint256[] memory indexForCollateral_LendOrder = allDynamicData.getDynamicUintArray(2);
+        uint256[] memory indexPrinciple_LendOrder = allDynamicData.getDynamicUintArray(2);
 
         lendOrders[0] = address(LendOrder);
         lendAmountPerOrder[0] = 25e17;

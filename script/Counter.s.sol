@@ -27,6 +27,7 @@ contract DeploymentScript is Script {
 
     DLOImplementation public LendOrder;
     DBOImplementation public BorrowOrder;
+
     function run() public {
         ownershipsContract = new Ownerships();
         incentivesContract = new DebitaIncentives();
@@ -45,22 +46,12 @@ contract DeploymentScript is Script {
             address(loanInstance)
         );
 
-        ownershipsContract.setDebitaContract(
-            address(DebitaV3AggregatorContract)
-        );
-        auctionFactoryDebitaContract.setAggregator(
-            address(DebitaV3AggregatorContract)
-        );
-        DLOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
-        DBOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
+        ownershipsContract.setDebitaContract(address(DebitaV3AggregatorContract));
+        auctionFactoryDebitaContract.setAggregator(address(DebitaV3AggregatorContract));
+        DLOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
+        DBOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
 
-        incentivesContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
+        incentivesContract.setAggregatorContract(address(DebitaV3AggregatorContract));
         console.logAddress(address(ownershipsContract));
         console.logAddress(address(incentivesContract));
         console.logAddress(address(DBOFactoryContract));

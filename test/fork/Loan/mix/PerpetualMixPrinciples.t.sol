@@ -57,7 +57,7 @@ contract testMultiplePrinciples is Test {
 
     address feeAddress = address(this);
 
-    uint receiptID;
+    uint256 receiptID;
 
     function setUp() public {
         allDynamicData = new DynamicData();
@@ -82,26 +82,13 @@ contract testMultiplePrinciples is Test {
             address(loanInstance)
         );
 
-        ownershipsContract.setDebitaContract(
-            address(DebitaV3AggregatorContract)
-        );
-        auctionFactoryDebitaContract.setAggregator(
-            address(DebitaV3AggregatorContract)
-        );
-        DLOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
-        DBOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
+        ownershipsContract.setDebitaContract(address(DebitaV3AggregatorContract));
+        auctionFactoryDebitaContract.setAggregator(address(DebitaV3AggregatorContract));
+        DLOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
+        DBOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
 
-        incentivesContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
-        DebitaV3AggregatorContract.setValidNFTCollateral(
-            address(receiptContract),
-            true
-        );
+        incentivesContract.setAggregatorContract(address(DebitaV3AggregatorContract));
+        DebitaV3AggregatorContract.setValidNFTCollateral(address(receiptContract), true);
 
         deal(AERO, firstLender, 1000e18, false);
         deal(AERO, secondLender, 1000e18, false);
@@ -115,21 +102,16 @@ contract testMultiplePrinciples is Test {
         IERC20(AERO).approve(address(DBOFactoryContract), 100e18);
 
         bool[] memory oraclesActivated = allDynamicData.getDynamicBoolArray(2);
-        uint[] memory ltvs = allDynamicData.getDynamicUintArray(2);
-        uint[] memory ratio = allDynamicData.getDynamicUintArray(2);
-        uint[] memory ratioLenders = allDynamicData.getDynamicUintArray(1);
-        uint[] memory ltvsLenders = allDynamicData.getDynamicUintArray(1);
-        bool[] memory oraclesActivatedLenders = allDynamicData
-            .getDynamicBoolArray(1);
+        uint256[] memory ltvs = allDynamicData.getDynamicUintArray(2);
+        uint256[] memory ratio = allDynamicData.getDynamicUintArray(2);
+        uint256[] memory ratioLenders = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ltvsLenders = allDynamicData.getDynamicUintArray(1);
+        bool[] memory oraclesActivatedLenders = allDynamicData.getDynamicBoolArray(1);
 
-        address[] memory acceptedPrinciples = allDynamicData
-            .getDynamicAddressArray(2);
-        address[] memory acceptedCollaterals = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory oraclesCollateral = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory oraclesPrinciples = allDynamicData
-            .getDynamicAddressArray(2);
+        address[] memory acceptedPrinciples = allDynamicData.getDynamicAddressArray(2);
+        address[] memory acceptedCollaterals = allDynamicData.getDynamicAddressArray(1);
+        address[] memory oraclesCollateral = allDynamicData.getDynamicAddressArray(1);
+        address[] memory oraclesPrinciples = allDynamicData.getDynamicAddressArray(2);
 
         ltvs[0] = 5000;
         acceptedPrinciples[0] = AERO;
@@ -235,9 +217,8 @@ contract testMultiplePrinciples is Test {
     function testPerpetual() public {
         matchOffers();
         // get loan info
-        DebitaV3Loan.LoanData memory loanData = DebitaV3LoanContract
-            .getLoanData();
-        uint[] memory indexes = allDynamicData.getDynamicUintArray(3);
+        DebitaV3Loan.LoanData memory loanData = DebitaV3LoanContract.getLoanData();
+        uint256[] memory indexes = allDynamicData.getDynamicUintArray(3);
         indexes[0] = 0;
         indexes[1] = 1;
         indexes[2] = 2;
@@ -246,48 +227,36 @@ contract testMultiplePrinciples is Test {
         AEROContract.approve(address(DebitaV3LoanContract), 10e18);
         wETHContract.approve(address(DebitaV3LoanContract), 10e18);
         // get info of LenderOrders before paying
-        DLOImplementation.LendInfo memory lendInfo_Before = LendOrder
-            .getLendInfo();
-        DLOImplementation.LendInfo
-            memory lendInfoSecond_Before = SecondLendOrder.getLendInfo();
-        DLOImplementation.LendInfo memory lendInfoThird_Before = ThirdLendOrder
-            .getLendInfo();
-        uint interestFirstLender = calculateInterest(0);
-        uint interestSecondLender = calculateInterest(1);
+        DLOImplementation.LendInfo memory lendInfo_Before = LendOrder.getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoSecond_Before = SecondLendOrder.getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoThird_Before = ThirdLendOrder.getLendInfo();
+        uint256 interestFirstLender = calculateInterest(0);
+        uint256 interestSecondLender = calculateInterest(1);
         DebitaV3LoanContract.payDebt(indexes);
         vm.stopPrank();
 
-        uint interestFee = (interestFirstLender * 1500) / 10000;
-        uint interestSecondFee = (interestSecondLender * 1500) / 10000;
+        uint256 interestFee = (interestFirstLender * 1500) / 10000;
+        uint256 interestSecondFee = (interestSecondLender * 1500) / 10000;
 
         // get first LendOrder Info
 
         DLOImplementation.LendInfo memory lendInfo = LendOrder.getLendInfo();
-        DLOImplementation.LendInfo memory lendInfoSecond = SecondLendOrder
-            .getLendInfo();
-        DLOImplementation.LendInfo memory lendInfoThird = ThirdLendOrder
-            .getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoSecond = SecondLendOrder.getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoThird = ThirdLendOrder.getLendInfo();
 
         assertEq(
             lendInfo.availableAmount,
-            lendInfo_Before.availableAmount +
-                loanData._acceptedOffers[0].principleAmount +
-                interestFirstLender -
-                interestFee
+            lendInfo_Before.availableAmount + loanData._acceptedOffers[0].principleAmount + interestFirstLender
+                - interestFee
         );
 
         assertEq(
             lendInfoSecond.availableAmount,
-            lendInfoSecond_Before.availableAmount +
-                loanData._acceptedOffers[1].principleAmount +
-                interestSecondLender -
-                interestSecondFee
+            lendInfoSecond_Before.availableAmount + loanData._acceptedOffers[1].principleAmount + interestSecondLender
+                - interestSecondFee
         );
 
-        assertEq(
-            lendInfoThird.availableAmount,
-            lendInfoThird_Before.availableAmount
-        );
+        assertEq(lendInfoThird.availableAmount, lendInfoThird_Before.availableAmount);
     }
 
     function testPerpetualWithExtend() public {
@@ -297,54 +266,40 @@ contract testMultiplePrinciples is Test {
         AEROContract.approve(address(DebitaV3LoanContract), 10e18);
         wETHContract.approve(address(DebitaV3LoanContract), 10e18);
         // get info of LenderOrders before paying
-        DLOImplementation.LendInfo memory lendInfo_Before = LendOrder
-            .getLendInfo();
-        DLOImplementation.LendInfo
-            memory lendInfoSecond_Before = SecondLendOrder.getLendInfo();
-        DLOImplementation.LendInfo memory lendInfoThird_Before = ThirdLendOrder
-            .getLendInfo();
+        DLOImplementation.LendInfo memory lendInfo_Before = LendOrder.getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoSecond_Before = SecondLendOrder.getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoThird_Before = ThirdLendOrder.getLendInfo();
 
         vm.warp(block.timestamp + 86401);
-        uint interestFirstLender = calculateInterest(0);
-        uint interestSecondLender = calculateInterest(1);
+        uint256 interestFirstLender = calculateInterest(0);
+        uint256 interestSecondLender = calculateInterest(1);
         DebitaV3LoanContract.extendLoan();
         vm.stopPrank();
 
-        uint interestFee = (interestFirstLender * 1500) / 10000;
-        uint interestSecondFee = (interestSecondLender * 1500) / 10000;
+        uint256 interestFee = (interestFirstLender * 1500) / 10000;
+        uint256 interestSecondFee = (interestSecondLender * 1500) / 10000;
 
         // get first LendOrder Info
 
         DLOImplementation.LendInfo memory lendInfo = LendOrder.getLendInfo();
-        DLOImplementation.LendInfo memory lendInfoSecond = SecondLendOrder
-            .getLendInfo();
-        DLOImplementation.LendInfo memory lendInfoThird = ThirdLendOrder
-            .getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoSecond = SecondLendOrder.getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoThird = ThirdLendOrder.getLendInfo();
 
-        assertEq(
-            lendInfo.availableAmount,
-            lendInfo_Before.availableAmount + interestFirstLender - interestFee
-        );
+        assertEq(lendInfo.availableAmount, lendInfo_Before.availableAmount + interestFirstLender - interestFee);
 
         assertEq(
             lendInfoSecond.availableAmount,
-            lendInfoSecond_Before.availableAmount +
-                interestSecondLender -
-                interestSecondFee
+            lendInfoSecond_Before.availableAmount + interestSecondLender - interestSecondFee
         );
 
-        assertEq(
-            lendInfoThird.availableAmount,
-            lendInfoThird_Before.availableAmount
-        );
+        assertEq(lendInfoThird.availableAmount, lendInfoThird_Before.availableAmount);
     }
 
     function testPerpetualAfterExtend() public {
         matchOffers();
         // get loan info
-        DebitaV3Loan.LoanData memory loanData = DebitaV3LoanContract
-            .getLoanData();
-        uint[] memory indexes = allDynamicData.getDynamicUintArray(3);
+        DebitaV3Loan.LoanData memory loanData = DebitaV3LoanContract.getLoanData();
+        uint256[] memory indexes = allDynamicData.getDynamicUintArray(3);
         indexes[0] = 0;
         indexes[1] = 1;
         indexes[2] = 2;
@@ -353,39 +308,32 @@ contract testMultiplePrinciples is Test {
         AEROContract.approve(address(DebitaV3LoanContract), 10e18);
         wETHContract.approve(address(DebitaV3LoanContract), 10e18);
         // get info of LenderOrders before paying
-        DLOImplementation.LendInfo memory lendInfo_Before = LendOrder
-            .getLendInfo();
-        DLOImplementation.LendInfo
-            memory lendInfoSecond_Before = SecondLendOrder.getLendInfo();
-        DLOImplementation.LendInfo memory lendInfoThird_Before = ThirdLendOrder
-            .getLendInfo();
+        DLOImplementation.LendInfo memory lendInfo_Before = LendOrder.getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoSecond_Before = SecondLendOrder.getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoThird_Before = ThirdLendOrder.getLendInfo();
 
         vm.warp(block.timestamp + 86401);
-        uint interestFirstLender = calculateInterest(0);
-        uint interestSecondLender = calculateInterest(1);
+        uint256 interestFirstLender = calculateInterest(0);
+        uint256 interestSecondLender = calculateInterest(1);
         DebitaV3LoanContract.extendLoan();
 
         vm.warp(block.timestamp + 864000);
-        uint interestFirstLenderFinalPayment = calculateInterest(0);
-        uint interestSecondLenderFinalPayment = calculateInterest(1);
+        uint256 interestFirstLenderFinalPayment = calculateInterest(0);
+        uint256 interestSecondLenderFinalPayment = calculateInterest(1);
         DebitaV3LoanContract.payDebt(indexes);
         vm.stopPrank();
 
-        uint interestFee = (interestFirstLender * 1500) / 10000;
-        uint interestSecondFee = (interestSecondLender * 1500) / 10000;
+        uint256 interestFee = (interestFirstLender * 1500) / 10000;
+        uint256 interestSecondFee = (interestSecondLender * 1500) / 10000;
 
-        uint interestFeeFinalPayment = (interestFirstLenderFinalPayment *
-            1500) / 10000;
-        uint interestSecondFeeFinalPayment = (interestSecondLenderFinalPayment *
-            1500) / 10000;
+        uint256 interestFeeFinalPayment = (interestFirstLenderFinalPayment * 1500) / 10000;
+        uint256 interestSecondFeeFinalPayment = (interestSecondLenderFinalPayment * 1500) / 10000;
 
         // get first LendOrder Info
 
         DLOImplementation.LendInfo memory lendInfo = LendOrder.getLendInfo();
-        DLOImplementation.LendInfo memory lendInfoSecond = SecondLendOrder
-            .getLendInfo();
-        DLOImplementation.LendInfo memory lendInfoThird = ThirdLendOrder
-            .getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoSecond = SecondLendOrder.getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoThird = ThirdLendOrder.getLendInfo();
 
         vm.startPrank(firstLender);
         vm.expectRevert();
@@ -398,36 +346,25 @@ contract testMultiplePrinciples is Test {
 
         assertEq(
             lendInfo.availableAmount,
-            lendInfo_Before.availableAmount +
-                loanData._acceptedOffers[0].principleAmount +
-                interestFirstLenderFinalPayment +
-                interestFirstLender -
-                interestFee -
-                interestFeeFinalPayment
+            lendInfo_Before.availableAmount + loanData._acceptedOffers[0].principleAmount
+                + interestFirstLenderFinalPayment + interestFirstLender - interestFee - interestFeeFinalPayment
         );
 
         assertEq(
             lendInfoSecond.availableAmount,
-            lendInfoSecond_Before.availableAmount +
-                loanData._acceptedOffers[1].principleAmount +
-                interestSecondLenderFinalPayment +
-                interestSecondLender -
-                interestSecondFee -
-                interestSecondFeeFinalPayment
+            lendInfoSecond_Before.availableAmount + loanData._acceptedOffers[1].principleAmount
+                + interestSecondLenderFinalPayment + interestSecondLender - interestSecondFee
+                - interestSecondFeeFinalPayment
         );
 
-        assertEq(
-            lendInfoThird.availableAmount,
-            lendInfoThird_Before.availableAmount
-        );
+        assertEq(lendInfoThird.availableAmount, lendInfoThird_Before.availableAmount);
     }
 
     function testActivePerpetualAndTurnItOff() public {
         matchOffers();
         // get loan info
-        DebitaV3Loan.LoanData memory loanData = DebitaV3LoanContract
-            .getLoanData();
-        uint[] memory indexes = allDynamicData.getDynamicUintArray(3);
+        DebitaV3Loan.LoanData memory loanData = DebitaV3LoanContract.getLoanData();
+        uint256[] memory indexes = allDynamicData.getDynamicUintArray(3);
         indexes[0] = 0;
         indexes[1] = 1;
         indexes[2] = 2;
@@ -436,97 +373,73 @@ contract testMultiplePrinciples is Test {
         AEROContract.approve(address(DebitaV3LoanContract), 10e18);
         wETHContract.approve(address(DebitaV3LoanContract), 10e18);
         // get info of LenderOrders before paying
-        DLOImplementation.LendInfo memory lendInfo_Before = LendOrder
-            .getLendInfo();
-        DLOImplementation.LendInfo
-            memory lendInfoSecond_Before = SecondLendOrder.getLendInfo();
-        DLOImplementation.LendInfo memory lendInfoThird_Before = ThirdLendOrder
-            .getLendInfo();
+        DLOImplementation.LendInfo memory lendInfo_Before = LendOrder.getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoSecond_Before = SecondLendOrder.getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoThird_Before = ThirdLendOrder.getLendInfo();
 
         vm.warp(block.timestamp + 86401);
-        uint interestFirstLender = calculateInterest(0);
-        uint interestSecondLender = calculateInterest(1);
+        uint256 interestFirstLender = calculateInterest(0);
+        uint256 interestSecondLender = calculateInterest(1);
         DebitaV3LoanContract.extendLoan();
         vm.stopPrank();
 
         vm.warp(block.timestamp + 864000);
-        uint interestFirstLenderFinalPayment = calculateInterest(0);
-        uint interestSecondLenderFinalPayment = calculateInterest(1);
+        uint256 interestFirstLenderFinalPayment = calculateInterest(0);
+        uint256 interestSecondLenderFinalPayment = calculateInterest(1);
         vm.prank(firstLender);
         LendOrder.changePerpetual(false);
         vm.prank(borrower);
         DebitaV3LoanContract.payDebt(indexes);
 
-        uint interestFee = (interestFirstLender * 1500) / 10000;
-        uint interestSecondFee = (interestSecondLender * 1500) / 10000;
+        uint256 interestFee = (interestFirstLender * 1500) / 10000;
+        uint256 interestSecondFee = (interestSecondLender * 1500) / 10000;
 
-        uint interestFeeFinalPayment = (interestFirstLenderFinalPayment *
-            1500) / 10000;
-        uint interestSecondFeeFinalPayment = (interestSecondLenderFinalPayment *
-            1500) / 10000;
+        uint256 interestFeeFinalPayment = (interestFirstLenderFinalPayment * 1500) / 10000;
+        uint256 interestSecondFeeFinalPayment = (interestSecondLenderFinalPayment * 1500) / 10000;
 
         // get first LendOrder Info
 
         DLOImplementation.LendInfo memory lendInfo = LendOrder.getLendInfo();
-        DLOImplementation.LendInfo memory lendInfoSecond = SecondLendOrder
-            .getLendInfo();
-        DLOImplementation.LendInfo memory lendInfoThird = ThirdLendOrder
-            .getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoSecond = SecondLendOrder.getLendInfo();
+        DLOImplementation.LendInfo memory lendInfoThird = ThirdLendOrder.getLendInfo();
 
         vm.startPrank(firstLender);
-        uint balanceBefore = AEROContract.balanceOf(firstLender);
+        uint256 balanceBefore = AEROContract.balanceOf(firstLender);
         DebitaV3LoanContract.claimDebt(0);
-        uint balanceAfter = AEROContract.balanceOf(firstLender);
+        uint256 balanceAfter = AEROContract.balanceOf(firstLender);
         vm.stopPrank();
 
         vm.startPrank(thirdLender);
         DebitaV3LoanContract.claimDebt(2);
         vm.stopPrank();
 
-        assertEq(
-            lendInfo.availableAmount,
-            lendInfo_Before.availableAmount + interestFirstLender - interestFee
-        );
+        assertEq(lendInfo.availableAmount, lendInfo_Before.availableAmount + interestFirstLender - interestFee);
 
         assertEq(
-            balanceBefore +
-                loanData._acceptedOffers[0].principleAmount +
-                interestFirstLenderFinalPayment -
-                interestFeeFinalPayment,
+            balanceBefore + loanData._acceptedOffers[0].principleAmount + interestFirstLenderFinalPayment
+                - interestFeeFinalPayment,
             balanceAfter
         );
 
         assertEq(
             lendInfoSecond.availableAmount,
-            lendInfoSecond_Before.availableAmount +
-                loanData._acceptedOffers[1].principleAmount +
-                interestSecondLenderFinalPayment +
-                interestSecondLender -
-                interestSecondFee -
-                interestSecondFeeFinalPayment
+            lendInfoSecond_Before.availableAmount + loanData._acceptedOffers[1].principleAmount
+                + interestSecondLenderFinalPayment + interestSecondLender - interestSecondFee
+                - interestSecondFeeFinalPayment
         );
 
-        assertEq(
-            lendInfoThird.availableAmount,
-            lendInfoThird_Before.availableAmount
-        );
+        assertEq(lendInfoThird.availableAmount, lendInfoThird_Before.availableAmount);
     }
 
     function matchOffers() public {
         vm.startPrank(connector);
         address[] memory lendOrders = allDynamicData.getDynamicAddressArray(3);
-        uint[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(
-            3
-        );
-        uint[] memory porcentageOfRatioPerLendOrder = allDynamicData
-            .getDynamicUintArray(3);
+        uint256[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(3);
+        uint256[] memory porcentageOfRatioPerLendOrder = allDynamicData.getDynamicUintArray(3);
         address[] memory principles = allDynamicData.getDynamicAddressArray(2);
-        uint[] memory indexForPrinciple_BorrowOrder = allDynamicData
-            .getDynamicUintArray(3);
-        uint[] memory indexForCollateral_LendOrder = allDynamicData
-            .getDynamicUintArray(3);
-        uint[] memory indexPrinciple_LendOrder = allDynamicData
-            .getDynamicUintArray(3);
+        uint256[] memory indexForPrinciple_BorrowOrder = allDynamicData.getDynamicUintArray(3);
+        uint256[] memory indexForCollateral_LendOrder = allDynamicData.getDynamicUintArray(3);
+        uint256[] memory indexPrinciple_LendOrder = allDynamicData.getDynamicUintArray(3);
 
         lendOrders[0] = address(LendOrder);
         lendAmountPerOrder[0] = 25e17;
@@ -566,10 +479,7 @@ contract testMultiplePrinciples is Test {
     }
 
     function setOracles() internal {
-        DebitaChainlink oracle = new DebitaChainlink(
-            0xBCF85224fc0756B9Fa45aA7892530B47e10b6433,
-            address(this)
-        );
+        DebitaChainlink oracle = new DebitaChainlink(0xBCF85224fc0756B9Fa45aA7892530B47e10b6433, address(this));
         DebitaPyth oracle2 = new DebitaPyth(address(0x0), address(0x0));
         DebitaV3AggregatorContract.setOracleEnabled(address(oracle), true);
         DebitaV3AggregatorContract.setOracleEnabled(address(oracle2), true);
@@ -581,7 +491,8 @@ contract testMultiplePrinciples is Test {
         DebitaChainlinkOracle = address(oracle);
         DebitaPythOracle = address(oracle2);
     }
-    function calculateInterest(uint index) internal returns (uint) {
+
+    function calculateInterest(uint256 index) internal returns (uint256) {
         return DebitaV3LoanContract.calculateInterestToPay(index);
     }
 }

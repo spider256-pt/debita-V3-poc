@@ -58,7 +58,7 @@ contract testIncentivesAmongMultipleLoans is Test {
 
     address feeAddress = address(this);
 
-    uint receiptID;
+    uint256 receiptID;
 
     function setUp() public {
         allDynamicData = new DynamicData();
@@ -83,26 +83,13 @@ contract testIncentivesAmongMultipleLoans is Test {
             address(loanInstance)
         );
 
-        ownershipsContract.setDebitaContract(
-            address(DebitaV3AggregatorContract)
-        );
-        auctionFactoryDebitaContract.setAggregator(
-            address(DebitaV3AggregatorContract)
-        );
-        DLOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
-        DBOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
+        ownershipsContract.setDebitaContract(address(DebitaV3AggregatorContract));
+        auctionFactoryDebitaContract.setAggregator(address(DebitaV3AggregatorContract));
+        DLOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
+        DBOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
 
-        incentivesContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
-        DebitaV3AggregatorContract.setValidNFTCollateral(
-            address(receiptContract),
-            true
-        );
+        incentivesContract.setAggregatorContract(address(DebitaV3AggregatorContract));
+        DebitaV3AggregatorContract.setValidNFTCollateral(address(receiptContract), true);
         setOracles();
         incentivesContract.whitelListCollateral(AERO, AERO, true);
         incentivesContract.whitelListCollateral(AERO, USDC, true);
@@ -115,14 +102,11 @@ contract testIncentivesAmongMultipleLoans is Test {
         createLoan(borrower, thirdLender, AERO, AERO);
         createLoan(borrower, firstLender, AERO, AERO);
         vm.warp(block.timestamp + 30 days);
-        uint balanceBefore = IERC20(USDC).balanceOf(secondLender);
+        uint256 balanceBefore = IERC20(USDC).balanceOf(secondLender);
         // principles, tokenIncentives, epoch with dynamic Data
         address[] memory principles = allDynamicData.getDynamicAddressArray(1);
-        address[] memory tokenUsedIncentive = allDynamicData
-            .getDynamicAddressArray(1);
-        address[][] memory tokenIncentives = new address[][](
-            tokenUsedIncentive.length
-        );
+        address[] memory tokenUsedIncentive = allDynamicData.getDynamicAddressArray(1);
+        address[][] memory tokenIncentives = new address[][](tokenUsedIncentive.length);
         principles[0] = AERO;
         tokenUsedIncentive[0] = USDC;
         tokenIncentives[0] = tokenUsedIncentive;
@@ -131,19 +115,19 @@ contract testIncentivesAmongMultipleLoans is Test {
         incentivesContract.claimIncentives(principles, tokenIncentives, 2);
         vm.expectRevert();
         incentivesContract.claimIncentives(principles, tokenIncentives, 2);
-        uint balanceAfter = IERC20(USDC).balanceOf(secondLender);
+        uint256 balanceAfter = IERC20(USDC).balanceOf(secondLender);
         vm.stopPrank();
 
         vm.startPrank(thirdLender);
-        uint balanceBefore_Third = IERC20(USDC).balanceOf(thirdLender);
+        uint256 balanceBefore_Third = IERC20(USDC).balanceOf(thirdLender);
         incentivesContract.claimIncentives(principles, tokenIncentives, 2);
-        uint balanceAfter_Third = IERC20(USDC).balanceOf(thirdLender);
+        uint256 balanceAfter_Third = IERC20(USDC).balanceOf(thirdLender);
         vm.stopPrank();
 
         vm.startPrank(firstLender);
-        uint balanceBefore_First = IERC20(USDC).balanceOf(firstLender);
+        uint256 balanceBefore_First = IERC20(USDC).balanceOf(firstLender);
         incentivesContract.claimIncentives(principles, tokenIncentives, 2);
-        uint balanceAfter_First = IERC20(USDC).balanceOf(firstLender);
+        uint256 balanceAfter_First = IERC20(USDC).balanceOf(firstLender);
         vm.expectRevert();
         incentivesContract.claimIncentives(principles, tokenIncentives, 2);
         vm.expectRevert();
@@ -151,7 +135,7 @@ contract testIncentivesAmongMultipleLoans is Test {
 
         vm.stopPrank();
 
-        uint amount = (1e18 * 3333) / 10000;
+        uint256 amount = (1e18 * 3333) / 10000;
 
         assertEq(balanceBefore_Third + amount, balanceAfter_Third);
         assertEq(balanceBefore_First + amount, balanceAfter_First);
@@ -166,15 +150,12 @@ contract testIncentivesAmongMultipleLoans is Test {
         createLoan(secondBorrower, firstLender, AERO, USDC);
 
         vm.warp(block.timestamp + 30 days);
-        uint balanceBefore = IERC20(USDC).balanceOf(borrower);
+        uint256 balanceBefore = IERC20(USDC).balanceOf(borrower);
         // principles, tokenIncentives, epoch with dynamic Data
 
         address[] memory principles = allDynamicData.getDynamicAddressArray(1);
-        address[] memory tokenUsedIncentive = allDynamicData
-            .getDynamicAddressArray(1);
-        address[][] memory tokenIncentives = new address[][](
-            tokenUsedIncentive.length
-        );
+        address[] memory tokenUsedIncentive = allDynamicData.getDynamicAddressArray(1);
+        address[][] memory tokenIncentives = new address[][](tokenUsedIncentive.length);
         principles[0] = AERO;
         tokenUsedIncentive[0] = USDC;
         tokenIncentives[0] = tokenUsedIncentive;
@@ -182,23 +163,23 @@ contract testIncentivesAmongMultipleLoans is Test {
         incentivesContract.claimIncentives(principles, tokenIncentives, 2);
         vm.expectRevert();
         incentivesContract.claimIncentives(principles, tokenIncentives, 2);
-        uint balanceAfter = IERC20(USDC).balanceOf(borrower);
+        uint256 balanceAfter = IERC20(USDC).balanceOf(borrower);
         vm.stopPrank();
 
         vm.startPrank(secondBorrower);
-        uint balanceBefore_Second = IERC20(USDC).balanceOf(secondBorrower);
+        uint256 balanceBefore_Second = IERC20(USDC).balanceOf(secondBorrower);
         incentivesContract.claimIncentives(principles, tokenIncentives, 2);
-        uint balanceAfter_Second = IERC20(USDC).balanceOf(secondBorrower);
+        uint256 balanceAfter_Second = IERC20(USDC).balanceOf(secondBorrower);
         vm.stopPrank();
 
         vm.startPrank(firstLender);
-        uint balanceBefore_First = IERC20(USDC).balanceOf(firstLender);
+        uint256 balanceBefore_First = IERC20(USDC).balanceOf(firstLender);
         vm.expectRevert();
         incentivesContract.claimIncentives(principles, tokenIncentives, 2);
-        uint balanceAfter_First = IERC20(USDC).balanceOf(firstLender);
+        uint256 balanceAfter_First = IERC20(USDC).balanceOf(firstLender);
         vm.stopPrank();
 
-        uint amount = (1e18 * 3333) / 10000;
+        uint256 amount = (1e18 * 3333) / 10000;
 
         assertEq(balanceBefore_Second + amount + amount, balanceAfter_Second);
         assertEq(balanceBefore + amount, balanceAfter);
@@ -210,18 +191,16 @@ contract testIncentivesAmongMultipleLoans is Test {
         address _collateral,
         address _incentiveToken,
         bool _isLend,
-        uint _amount,
-        uint epoch
+        uint256 _amount,
+        uint256 epoch
     ) internal {
         address[] memory principles = allDynamicData.getDynamicAddressArray(1);
         address[] memory collateral = allDynamicData.getDynamicAddressArray(1);
-        address[] memory incentiveToken = allDynamicData.getDynamicAddressArray(
-            1
-        );
+        address[] memory incentiveToken = allDynamicData.getDynamicAddressArray(1);
 
         bool[] memory isLend = allDynamicData.getDynamicBoolArray(1);
-        uint[] memory amount = allDynamicData.getDynamicUintArray(1);
-        uint[] memory epochs = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory amount = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory epochs = allDynamicData.getDynamicUintArray(1);
 
         principles[0] = _principle;
         collateral[0] = _collateral;
@@ -232,20 +211,11 @@ contract testIncentivesAmongMultipleLoans is Test {
 
         IERC20(_incentiveToken).approve(address(incentivesContract), 1000e18);
         deal(_incentiveToken, address(this), _amount, false);
-        incentivesContract.incentivizePair(
-            principles,
-            incentiveToken,
-            isLend,
-            amount,
-            epochs
-        );
+        incentivesContract.incentivizePair(principles, incentiveToken, isLend, amount, epochs);
     }
 
     function setOracles() internal {
-        DebitaChainlink oracle = new DebitaChainlink(
-            0xBCF85224fc0756B9Fa45aA7892530B47e10b6433,
-            address(this)
-        );
+        DebitaChainlink oracle = new DebitaChainlink(0xBCF85224fc0756B9Fa45aA7892530B47e10b6433, address(this));
         DebitaPyth oracle2 = new DebitaPyth(address(0x0), address(0x0));
         DebitaV3AggregatorContract.setOracleEnabled(address(oracle), true);
         DebitaV3AggregatorContract.setOracleEnabled(address(oracle2), true);
@@ -257,32 +227,26 @@ contract testIncentivesAmongMultipleLoans is Test {
         DebitaChainlinkOracle = address(oracle);
         DebitaPythOracle = address(oracle2);
     }
-    function createLoan(
-        address _borrower,
-        address lender,
-        address principle,
-        address collateral
-    ) internal returns (address) {
+
+    function createLoan(address _borrower, address lender, address principle, address collateral)
+        internal
+        returns (address)
+    {
         vm.startPrank(_borrower);
         deal(principle, lender, 1000e18, false);
         deal(collateral, _borrower, 1000e18, false);
         IERC20(collateral).approve(address(DBOFactoryContract), 100e18);
         bool[] memory oraclesActivated = allDynamicData.getDynamicBoolArray(1);
-        uint[] memory ltvs = allDynamicData.getDynamicUintArray(1);
-        uint[] memory ratio = allDynamicData.getDynamicUintArray(1);
-        uint[] memory ratioLenders = allDynamicData.getDynamicUintArray(1);
-        uint[] memory ltvsLenders = allDynamicData.getDynamicUintArray(1);
-        bool[] memory oraclesActivatedLenders = allDynamicData
-            .getDynamicBoolArray(1);
+        uint256[] memory ltvs = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ratio = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ratioLenders = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ltvsLenders = allDynamicData.getDynamicUintArray(1);
+        bool[] memory oraclesActivatedLenders = allDynamicData.getDynamicBoolArray(1);
 
-        address[] memory acceptedPrinciples = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory acceptedCollaterals = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory oraclesCollateral = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory oraclesPrinciples = allDynamicData
-            .getDynamicAddressArray(1);
+        address[] memory acceptedPrinciples = allDynamicData.getDynamicAddressArray(1);
+        address[] memory acceptedCollaterals = allDynamicData.getDynamicAddressArray(1);
+        address[] memory oraclesCollateral = allDynamicData.getDynamicAddressArray(1);
+        address[] memory oraclesPrinciples = allDynamicData.getDynamicAddressArray(1);
 
         // set the values for the loan
         ltvs[0] = 5000;
@@ -334,18 +298,12 @@ contract testIncentivesAmongMultipleLoans is Test {
         vm.startPrank(connector);
 
         address[] memory lendOrders = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(
-            1
-        );
-        uint[] memory porcentageOfRatioPerLendOrder = allDynamicData
-            .getDynamicUintArray(1);
+        uint256[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory porcentageOfRatioPerLendOrder = allDynamicData.getDynamicUintArray(1);
         address[] memory principles = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory indexForPrinciple_BorrowOrder = allDynamicData
-            .getDynamicUintArray(1);
-        uint[] memory indexForCollateral_LendOrder = allDynamicData
-            .getDynamicUintArray(1);
-        uint[] memory indexPrinciple_LendOrder = allDynamicData
-            .getDynamicUintArray(1);
+        uint256[] memory indexForPrinciple_BorrowOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexForCollateral_LendOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexPrinciple_LendOrder = allDynamicData.getDynamicUintArray(1);
 
         lendOrders[0] = lendOrderAddress;
         lendAmountPerOrder[0] = 5e18;

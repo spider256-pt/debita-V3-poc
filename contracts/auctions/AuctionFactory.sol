@@ -192,47 +192,48 @@ contract auctionFactoryDebita {
         // Less than 30% and more than 5%
         require(_ratio <= 3000 && _ratio >= 500, "Invalid ratio");
         FloorPricePercentage = _ratio;
-    }
+    } //done
 
     function changeAuctionFee(uint _fee) public onlyOwner {
         // between 0.5% and 4%
         require(_fee <= 400 && _fee >= 50, "Invalid fee");
         auctionFee = _fee;
-    }
+    } //done
+
     function changePublicAuctionFee(uint _fee) public onlyOwner {
         // between 0% and 1%
         require(_fee <= 100 && _fee >= 0, "Invalid fee");
         publicAuctionFee = _fee;
-    }
+    } //done
 
     function setAggregator(address _aggregator) public onlyOwner {
         require(aggregator == address(0), "Already set");
         aggregator = _aggregator;
-    }
+    } //done
 
     function setFeeAddress(address _feeAddress) public onlyOwner {
         feeAddress = _feeAddress;
-    }
+    } //done
 
     function changeOwner(address owner) public {
         require(msg.sender == owner, "Only owner");
         require(deployedTime + 6 hours > block.timestamp, "6 hours passed");
         owner = owner;
-    }
+    } //done
 
     function emitAuctionDeleted(
         address _auctionAddress,
         address creator
     ) public onlyAuctions {
         emit auctionEnded(_auctionAddress, creator);
-    }
+    } //done
 
     function emitAuctionEdited(
         address _auctionAddress,
         address creator
     ) public onlyAuctions {
         emit auctionEdited(_auctionAddress, creator);
-    }
+    } //done
 
     // Events mints
 }

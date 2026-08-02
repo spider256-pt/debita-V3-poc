@@ -54,35 +54,23 @@ contract DebitaAggregatorTest is Test, DynamicData {
             address(loanInstance)
         );
 
-        ownershipsContract.setDebitaContract(
-            address(DebitaV3AggregatorContract)
-        );
-        auctionFactoryDebitaContract.setAggregator(
-            address(DebitaV3AggregatorContract)
-        );
-        DLOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
-        DBOFactoryContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
+        ownershipsContract.setDebitaContract(address(DebitaV3AggregatorContract));
+        auctionFactoryDebitaContract.setAggregator(address(DebitaV3AggregatorContract));
+        DLOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
+        DBOFactoryContract.setAggregatorContract(address(DebitaV3AggregatorContract));
 
-        incentivesContract.setAggregatorContract(
-            address(DebitaV3AggregatorContract)
-        );
+        incentivesContract.setAggregatorContract(address(DebitaV3AggregatorContract));
 
         deal(AERO, address(this), 1000e18, false);
         IERC20(AERO).approve(address(DBOFactoryContract), 1000e18);
         IERC20(AERO).approve(address(DLOFactoryContract), 1000e18);
 
         bool[] memory oraclesActivated = allDynamicData.getDynamicBoolArray(1);
-        uint[] memory ltvs = allDynamicData.getDynamicUintArray(1);
-        uint[] memory ratio = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ltvs = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory ratio = allDynamicData.getDynamicUintArray(1);
 
-        address[] memory acceptedPrinciples = allDynamicData
-            .getDynamicAddressArray(1);
-        address[] memory oraclesPrinciples = allDynamicData
-            .getDynamicAddressArray(1);
+        address[] memory acceptedPrinciples = allDynamicData.getDynamicAddressArray(1);
+        address[] memory oraclesPrinciples = allDynamicData.getDynamicAddressArray(1);
 
         ratio[0] = 1e18;
         oraclesPrinciples[0] = address(0x0);
@@ -127,18 +115,12 @@ contract DebitaAggregatorTest is Test, DynamicData {
 
     function testMatchOffers() public {
         address[] memory lendOrders = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(
-            1
-        );
-        uint[] memory porcentageOfRatioPerLendOrder = allDynamicData
-            .getDynamicUintArray(1);
+        uint256[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory porcentageOfRatioPerLendOrder = allDynamicData.getDynamicUintArray(1);
         address[] memory principles = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory indexForPrinciple_BorrowOrder = allDynamicData
-            .getDynamicUintArray(1);
-        uint[] memory indexForCollateral_LendOrder = allDynamicData
-            .getDynamicUintArray(1);
-        uint[] memory indexPrinciple_LendOrder = allDynamicData
-            .getDynamicUintArray(1);
+        uint256[] memory indexForPrinciple_BorrowOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexForCollateral_LendOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexPrinciple_LendOrder = allDynamicData.getDynamicUintArray(1);
         indexForPrinciple_BorrowOrder[0] = 0;
         indexForCollateral_LendOrder[0] = 0;
         indexPrinciple_LendOrder[0] = 0;
@@ -159,20 +141,15 @@ contract DebitaAggregatorTest is Test, DynamicData {
             indexPrinciple_LendOrder
         );
     }
+
     function testMatchOffersAndCheckParams() public {
         address[] memory lendOrders = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(
-            1
-        );
-        uint[] memory porcentageOfRatioPerLendOrder = allDynamicData
-            .getDynamicUintArray(1);
+        uint256[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory porcentageOfRatioPerLendOrder = allDynamicData.getDynamicUintArray(1);
         address[] memory principles = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory indexForPrinciple_BorrowOrder = allDynamicData
-            .getDynamicUintArray(1);
-        uint[] memory indexForCollateral_LendOrder = allDynamicData
-            .getDynamicUintArray(1);
-        uint[] memory indexPrinciple_LendOrder = allDynamicData
-            .getDynamicUintArray(1);
+        uint256[] memory indexForPrinciple_BorrowOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexForCollateral_LendOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexPrinciple_LendOrder = allDynamicData.getDynamicUintArray(1);
         indexForPrinciple_BorrowOrder[0] = 0;
         indexForCollateral_LendOrder[0] = 0;
         indexPrinciple_LendOrder[0] = 0;
@@ -194,32 +171,23 @@ contract DebitaAggregatorTest is Test, DynamicData {
         );
 
         DebitaV3Loan loanContract = DebitaV3Loan(loan);
-        assertEq(
-            loanContract.getLoanData()._acceptedOffers[0].principleAmount,
-            3e18
-        );
+        assertEq(loanContract.getLoanData()._acceptedOffers[0].principleAmount, 3e18);
         assertEq(loanContract.getLoanData()._acceptedOffers[0].apr, 1000);
 
         assertEq(
-            loanContract.getLoanData()._acceptedOffers[0].maxDeadline,
-            8640000 + loanContract.getLoanData().startedAt
+            loanContract.getLoanData()._acceptedOffers[0].maxDeadline, 8640000 + loanContract.getLoanData().startedAt
         );
         assertEq(loanContract.getLoanData().initialDuration, 864000);
     }
+
     function testMatchOffersAndPayBack() public {
         address[] memory lendOrders = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(
-            1
-        );
-        uint[] memory porcentageOfRatioPerLendOrder = allDynamicData
-            .getDynamicUintArray(1);
+        uint256[] memory lendAmountPerOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory porcentageOfRatioPerLendOrder = allDynamicData.getDynamicUintArray(1);
         address[] memory principles = allDynamicData.getDynamicAddressArray(1);
-        uint[] memory indexForPrinciple_BorrowOrder = allDynamicData
-            .getDynamicUintArray(1);
-        uint[] memory indexForCollateral_LendOrder = allDynamicData
-            .getDynamicUintArray(1);
-        uint[] memory indexPrinciple_LendOrder = allDynamicData
-            .getDynamicUintArray(1);
+        uint256[] memory indexForPrinciple_BorrowOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexForCollateral_LendOrder = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexPrinciple_LendOrder = allDynamicData.getDynamicUintArray(1);
         indexForPrinciple_BorrowOrder[0] = 0;
         indexForCollateral_LendOrder[0] = 0;
         indexPrinciple_LendOrder[0] = 0;
@@ -229,7 +197,7 @@ contract DebitaAggregatorTest is Test, DynamicData {
         porcentageOfRatioPerLendOrder[0] = 10000;
         principles[0] = AERO;
 
-        uint balanceBefore = IERC20(AERO).balanceOf(address(this));
+        uint256 balanceBefore = IERC20(AERO).balanceOf(address(this));
         address loan = DebitaV3AggregatorContract.matchOffersV3(
             lendOrders,
             lendAmountPerOrder,
@@ -240,43 +208,28 @@ contract DebitaAggregatorTest is Test, DynamicData {
             indexForCollateral_LendOrder,
             indexPrinciple_LendOrder
         );
-        uint balanceAfter = IERC20(AERO).balanceOf(address(this));
+        uint256 balanceAfter = IERC20(AERO).balanceOf(address(this));
         assertEq(balanceAfter, balanceBefore + 3e18);
         DebitaV3Loan loanContract = DebitaV3Loan(loan);
-        uint[] memory indexes = allDynamicData.getDynamicUintArray(1);
+        uint256[] memory indexes = allDynamicData.getDynamicUintArray(1);
         indexes[0] = 0;
 
         IERC20(AERO).approve(loan, 4e18);
         loanContract.payDebt(indexes);
-        uint balanceBeforeClaim = IERC20(AERO).balanceOf(address(this));
+        uint256 balanceBeforeClaim = IERC20(AERO).balanceOf(address(this));
         loanContract.claimDebt(0);
-        uint balanceAfterClaim = IERC20(AERO).balanceOf(address(this));
-        uint principleAmount = loanContract
-            .getLoanData()
-            ._acceptedOffers[0]
-            .principleAmount;
-        uint anualInterest = (principleAmount *
-            loanContract.getLoanData()._acceptedOffers[0].apr) / 10000;
-        uint activeTime = (loanContract.getLoanData().initialDuration * 1000) /
-            10000;
-        uint interest = (anualInterest * activeTime) / 31536000;
-        uint feeInterest = (interest * 1500) / 10000;
+        uint256 balanceAfterClaim = IERC20(AERO).balanceOf(address(this));
+        uint256 principleAmount = loanContract.getLoanData()._acceptedOffers[0].principleAmount;
+        uint256 anualInterest = (principleAmount * loanContract.getLoanData()._acceptedOffers[0].apr) / 10000;
+        uint256 activeTime = (loanContract.getLoanData().initialDuration * 1000) / 10000;
+        uint256 interest = (anualInterest * activeTime) / 31536000;
+        uint256 feeInterest = (interest * 1500) / 10000;
 
-        assertEq(
-            balanceAfterClaim,
-            balanceBeforeClaim + interest + principleAmount - feeInterest
-        );
+        assertEq(balanceAfterClaim, balanceBeforeClaim + interest + principleAmount - feeInterest);
 
-        uint balanceBeforeClaimCollateral = IERC20(AERO).balanceOf(
-            address(this)
-        );
+        uint256 balanceBeforeClaimCollateral = IERC20(AERO).balanceOf(address(this));
         loanContract.claimCollateralAsBorrower(indexes);
-        uint balanceAfterClaimCollateral = IERC20(AERO).balanceOf(
-            address(this)
-        );
-        assertEq(
-            balanceAfterClaimCollateral,
-            balanceBeforeClaimCollateral + 3e18
-        );
+        uint256 balanceAfterClaimCollateral = IERC20(AERO).balanceOf(address(this));
+        assertEq(balanceAfterClaimCollateral, balanceBeforeClaimCollateral + 3e18);
     }
 }
