@@ -223,7 +223,7 @@ contract DutchAuction_veNFT is ERC721Holder {
             s_ownerOfAuction
         );
         // emit offer edited
-    } //pending
+    } //done
 
     function getCurrentPrice() public view returns (uint) {
         dutchAuction_INFO memory m_currentAuction = s_CurrentAuction;

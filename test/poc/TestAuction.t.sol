@@ -279,4 +279,40 @@ contract TestAuction is Test {
         //Assert
         assertEq(auction.getAuctionData().floorAmount, currentfloorValue);
     }
+
+    function test_getCurrentPrice() public {
+        //Arrange
+        vm.startPrank(spider);
+
+        //Act
+        uint256 initial_price = auction.getCurrentPrice();
+        uint256 no_dayPAss = auction.getCurrentPrice();
+        vm.warp(1 days);
+        uint256 aDay_passed_Price = auction.getCurrentPrice();
+        vm.warp(7 days);
+        uint256 twoDays_passed_price = auction.getCurrentPrice();
+        //Assert
+        assertEq(initial_price, no_dayPAss, "It should be Equal");
+        assertGt(no_dayPAss, aDay_passed_Price, "Price should drop");
+        assertLt(twoDays_passed_price, aDay_passed_Price, "Price should drop");
+    }
+
+    function test_RevertIfTheReturnValueIncreasedAfterTimePasses(
+        uint256 time
+    ) public {
+        //Arrange
+        time = bound(time, 1 days, 19 days);
+        vm.startPrank(spider);
+        //Act
+        uint256 init_price = auction.getCurrentPrice();
+        vm.warp(block.timestamp + time);
+        uint256 final_price = auction.getCurrentPrice();
+
+        //Assert
+        assertLe(
+            final_price,
+            init_price,
+            "The price should have dropped or equal"
+        );
+    }
 }
