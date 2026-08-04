@@ -49,6 +49,7 @@ contract TestAuction is Test {
         0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
 
     address spider = makeAddr("spider");
+    address void = makeAddr("void");
 
     /*//////////////////////////////////////////////////////////////
                                   TEST
@@ -84,9 +85,8 @@ contract TestAuction is Test {
         vm.prank(FOUNDRY_DEFAULT);
         aDebita.setAggregator(address(aggregator));
 
-        uint256 tokenId = mveNFT.mint(FOUNDRY_DEFAULT);
-
-        vm.startPrank(FOUNDRY_DEFAULT);
+        vm.startPrank(void);
+        uint256 tokenId = mveNFT.mint(void);
         mveNFT.approve(address(aDebita), tokenId);
         address aDebitaAuction = aDebita.createAuction(
             tokenId,
@@ -108,7 +108,7 @@ contract TestAuction is Test {
         address owner = auction.s_ownerOfAuction();
         console.log(owner);
         //Assert
-        assertEq(FOUNDRY_DEFAULT, owner, "The default should be the owner");
+        assertEq(void, owner, "The default should be the owner");
     }
 
     function test_Factory() public {
@@ -169,4 +169,35 @@ contract TestAuction is Test {
         //Assert
         assertEq(fianl_NFTBalance, 1);
     }
+
+    function test_cancelAuction() public {
+        //Arrange
+
+        vm.startPrank(void);
+        uint256 x = aDebita.activeOrdersCount();
+        console.log(x);
+        auction.cancelAuction();
+        uint256 y = aDebita.activeOrdersCount();
+        vm.stopPrank();
+        //Assert
+        assertEq(y, 0, "The active auctions shoudl be 0");
+    }
+
+    function test_RevertIfcancelAuctionCalledbyNoneOwner() public {
+        //Arrange
+        vm.startPrank(spider);
+        //Act
+        uint256 x = aDebita.activeOrdersCount();
+        console.log(x);
+        vm.expectRevert();
+        auction.cancelAuction();
+        //Assert
+        assertEq(
+            aDebita.activeOrdersCount(),
+            x,
+            "The non-owner can cancel a auction"
+        );
+    }
+
+    function test_RevertIfcancelAuctionisCalledAfterbuy_NFT() public {}
 }

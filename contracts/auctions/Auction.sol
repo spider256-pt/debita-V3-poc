@@ -158,7 +158,7 @@ contract DutchAuction_veNFT is ERC721Holder {
             s_ownerOfAuction
         );
         // event offerBought
-    }
+    } //done
 
     /**
      * @dev User cancels the auction
@@ -181,7 +181,7 @@ contract DutchAuction_veNFT is ERC721Holder {
             s_ownerOfAuction
         );
         // event offerCanceled
-    }
+    } //done
 
     /**
      * @notice the same tickPerBlock is used for the whole auction, so the duration will be longer
@@ -223,7 +223,7 @@ contract DutchAuction_veNFT is ERC721Holder {
             s_ownerOfAuction
         );
         // emit offer edited
-    }
+    } //pending
 
     function getCurrentPrice() public view returns (uint) {
         dutchAuction_INFO memory m_currentAuction = s_CurrentAuction;
@@ -243,9 +243,9 @@ contract DutchAuction_veNFT is ERC721Holder {
             currentPrice /
             (10 ** m_currentAuction.differenceDecimals);
         return currentPrice;
-    }
+    } //pending
 
     function getAuctionData() public view returns (dutchAuction_INFO memory) {
         return s_CurrentAuction;
-    }
+    } //pending
 }
