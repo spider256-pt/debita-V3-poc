@@ -4,7 +4,9 @@ pragma solidity ^0.8.0;
 
 import {auctionFactoryDebita} from "@contracts/auctions/AuctionFactory.sol";
 import {Test, console} from "forge-std/Test.sol";
-import {DeployAuctionFactory} from "../../script/poc/DeployAuctionFactory.s.sol";
+import {
+    DeployAuctionFactory
+} from "../../script/poc/DeployAuctionFactory.s.sol";
 import {DutchAuction_veNFT} from "@contracts/auctions/Auction.sol";
 import {MockveNFT} from "../../mockTokens/mockveNFT.sol";
 import {MockERC20} from "../../mockTokens/mockERC20.sol";
@@ -12,7 +14,9 @@ import {MockERC20} from "../../mockTokens/mockERC20.sol";
 //Requirements for DebitaV3Aggregator.
 import {DebitaV3Aggregator} from "@contracts/DebitaV3Aggregator.sol";
 import {DBOFactory} from "@contracts/DebitaBorrowOffer-Factory.sol";
-import {DBOImplementation} from "@contracts/DebitaBorrowOffer-Implementation.sol";
+import {
+    DBOImplementation
+} from "@contracts/DebitaBorrowOffer-Implementation.sol";
 import {DLOFactory} from "@contracts/DebitaLendOfferFactory.sol";
 import {DLOImplementation} from "@contracts/DebitaLendOffer-Implementation.sol";
 import {DebitaIncentives} from "@contracts/DebitaIncentives.sol";
@@ -43,7 +47,8 @@ contract TestAuctionFactory is Test {
     address owner = makeAddr("owner");
     address spider = makeAddr("spider");
 
-    address constant FOUNDRY_DEFAULT = 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
+    address constant FOUNDRY_DEFAULT =
+        0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
 
     /*//////////////////////////////////////////////////////////////
                                  SETUP
@@ -91,7 +96,14 @@ contract TestAuctionFactory is Test {
             uint256 testId = mveNFT.mint(spider);
             mveNFT.approve(address(aDebita), testId);
 
-            address auctionAddress = aDebita.createAuction(testId, address(mveNFT), address(mERC20), 200, 100, 86400);
+            address auctionAddress = aDebita.createAuction(
+                testId,
+                address(mveNFT),
+                address(mERC20),
+                200,
+                100,
+                86400
+            );
         }
         _;
         vm.stopPrank();
@@ -120,13 +132,24 @@ contract TestAuctionFactory is Test {
         mveNFT.approve(address(aDebita), testId);
 
         //Act
-        address auctionAddress = aDebita.createAuction(testId, address(mveNFT), address(mERC20), 200, 100, 86400);
+        address auctionAddress = aDebita.createAuction(
+            testId,
+            address(mveNFT),
+            address(mERC20),
+            200,
+            100,
+            86400
+        );
         vm.stopPrank();
         //Assert
         assertTrue(auctionAddress != address(0), "Auction Not created");
         bool isRegistered = aDebita.isAuction(auctionAddress);
         assertTrue(isRegistered, "Auciton is not Registered");
-        assertEq(aDebita.activeOrdersCount(), 1, "Active orders count should be 1");
+        assertEq(
+            aDebita.activeOrdersCount(),
+            1,
+            "Active orders count should be 1"
+        );
     }
 
     /**
@@ -135,7 +158,8 @@ contract TestAuctionFactory is Test {
     function testgetActiveAuctionOrders() public createAuction {
         //Arrange
         //Act
-        DutchAuction_veNFT.dutchAuction_INFO[] memory results = aDebita.getActiveAuctionOrders(0, 6);
+        DutchAuction_veNFT.dutchAuction_INFO[] memory results = aDebita
+            .getActiveAuctionOrders(0, 6);
         //Assert
         assertEq(aDebita.activeOrdersCount(), 6, "There should be 6 auction");
         assertEq(results.length, 6);
@@ -147,13 +171,17 @@ contract TestAuctionFactory is Test {
 
     function testgetLiquidationFloorPrice(uint256 initAmount) public {
         //Arrange
-        uint256 initAmount = bound(initAmount, 0, 1e9);
+        initAmount = bound(initAmount, 0, 1e9);
 
         //Act
         uint256 floorPrice = aDebita.getLiquidationFloorPrice(initAmount);
 
         //Assert
-        assertEq(floorPrice, (initAmount * 1500) / 10000, "floorPrice crashed for some values");
+        assertEq(
+            floorPrice,
+            (initAmount * 1500) / 10000,
+            "floorPrice crashed for some values"
+        );
     }
 
     function testdeleteAuctionOrder() public createAuction {
@@ -184,7 +212,8 @@ contract TestAuctionFactory is Test {
 
         uint256 auctionCountAfterDelete = aDebita.getHistoricalAmount();
         //Act
-        DutchAuction_veNFT.dutchAuction_INFO[] memory results = aDebita.getHistoricalAuctions(0, 6);
+        DutchAuction_veNFT.dutchAuction_INFO[] memory results = aDebita
+            .getHistoricalAuctions(0, 6);
         //Assert
 
         assertEq(results.length, 6, "There should be 6 auction");
@@ -208,7 +237,9 @@ contract TestAuctionFactory is Test {
     //     assertEq(newOwner, initialOnwer);
     // }
 
-    function testRevertIfFsetFloorPriceForLiquidationsExceedsRanges(uint256 ratio) public {
+    function testRevertIfFsetFloorPriceForLiquidationsExceedsRanges(
+        uint256 ratio
+    ) public {
         //Arrange
         vm.startPrank(FOUNDRY_DEFAULT);
         ratio = bound(ratio, 3001, type(uint256).max);
@@ -225,7 +256,9 @@ contract TestAuctionFactory is Test {
         // );
     }
 
-    function testRevertIfFsetFloorPriceForLiquidationsIsUnderRange(uint256 ratio) public {
+    function testRevertIfFsetFloorPriceForLiquidationsIsUnderRange(
+        uint256 ratio
+    ) public {
         //Arrange
         vm.startPrank(FOUNDRY_DEFAULT);
         ratio = bound(ratio, 0, 499);
@@ -263,7 +296,9 @@ contract TestAuctionFactory is Test {
         vm.stopPrank();
     }
 
-    function testRevertIfchangePublicAuctionFeeExceedsRange(uint256 fee) public {
+    function testRevertIfchangePublicAuctionFeeExceedsRange(
+        uint256 fee
+    ) public {
         //Arrange
         vm.startPrank(FOUNDRY_DEFAULT);
         fee = bound(fee, 101, type(uint256).max);
