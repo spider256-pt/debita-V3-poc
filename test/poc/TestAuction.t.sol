@@ -92,8 +92,8 @@ contract TestAuction is Test {
             tokenId,
             address(mveNFT),
             address(mERC20),
-            200,
-            100,
+            1e18,
+            1e10,
             86400
         );
         vm.stopPrank();
@@ -199,5 +199,84 @@ contract TestAuction is Test {
         );
     }
 
-    function test_RevertIfcancelAuctionisCalledAfterbuy_NFT() public {}
+    function test_RevertIfcancelAuctionisCalledAfterbuy_NFT() public {
+        //Arrange
+        vm.startPrank(void);
+        mERC20.mint(void, 1e18);
+        mERC20.approve(address(auction), 1e18);
+        uint256 activAuctionCount = aDebita.activeOrdersCount();
+
+        //Act
+        auction.buyNFT();
+
+        uint256 activeAuctionAfterBuy = aDebita.activeOrdersCount();
+
+        vm.expectRevert();
+        auction.cancelAuction();
+        //Assert
+        assertEq(activAuctionCount, 1);
+        assertEq(activeAuctionAfterBuy, 0);
+        vm.stopPrank();
+    }
+
+    function test_editFloorPrice(uint256 newValue) public {
+        //Arrange
+        newValue = bound(newValue, 0, 1e9);
+        vm.startPrank(void);
+        //Act
+        auction.editFloorPrice(newValue);
+        vm.stopPrank();
+        //Assert
+        assertEq(newValue, auction.getAuctionData().floorAmount);
+    }
+
+    function test_RevertIfNonOwnerTriesToSetNewFloor(uint256 newValue) public {
+        //Arrange
+        newValue = bound(newValue, 0, 1e9);
+        vm.startPrank(spider);
+        //Act
+        vm.expectRevert();
+        auction.editFloorPrice(newValue);
+        vm.stopPrank();
+        //Assert
+        assertEq(
+            auction.getAuctionData().floorAmount,
+            1e10,
+            "shoudl not be changed"
+        );
+    }
+
+    function test_RevertIfOwnerTriesTOSetNewFloorValueAfterAuctionDeleted()
+        public
+    {
+        //Arrange
+        vm.startPrank(void);
+        auction.cancelAuction();
+        uint256 afterCancelingTheAuction = aDebita.activeOrdersCount();
+
+        //Act
+        vm.expectRevert();
+        auction.editFloorPrice(1e9);
+        //Assert
+        assertEq(
+            afterCancelingTheAuction,
+            0,
+            "The auction should be deleted and the active auction count should be 0"
+        );
+    }
+
+    function test_RevertIFOwnerSetNewFloorvValueGretterOrEqualstoCurrentFloorValue(
+        uint256 newValue
+    ) public {
+        //Arrange
+        vm.startPrank(void);
+        uint256 currentfloorValue = auction.getAuctionData().floorAmount;
+        newValue = bound(newValue, currentfloorValue, type(uint256).max);
+        //Act
+        vm.expectRevert();
+        auction.editFloorPrice(newValue);
+        vm.stopPrank();
+        //Assert
+        assertEq(auction.getAuctionData().floorAmount, currentfloorValue);
+    }
 }
