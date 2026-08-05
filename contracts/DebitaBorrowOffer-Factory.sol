@@ -154,7 +154,7 @@ contract DBOFactory {
             true
         );
         return address(borrowOffer);
-    }
+    } //pending
 
     /**
      * @dev Deletes Borrow Order from index -- only callable from borrow Orders
@@ -174,7 +174,7 @@ contract DBOFactory {
         // switch index of the last borrow order to the deleted borrow order
         borrowOrderIndex[allActiveBorrowOrders[index]] = index;
         activeOrdersCount--;
-    }
+    } //pendiing
 
     function getActiveBorrowOrders(
         uint offset,
@@ -196,7 +196,7 @@ contract DBOFactory {
             result[i] = borrowInfo;
         }
         return result;
-    }
+    } //pending
 
     function setAggregatorContract(address _aggregatorContract) external {
         require(aggregatorContract == address(0), "Already set");
@@ -218,7 +218,7 @@ contract DBOFactory {
             borrowInfo.availableAmount,
             false
         );
-    }
+    } //pending
 
     function emitUpdate(address _borrowOrder) external onlyBorrowOrder {
         DBOImplementation borrowOrder = DBOImplementation(_borrowOrder);
@@ -234,5 +234,5 @@ contract DBOFactory {
             borrowInfo.availableAmount,
             borrowOrder.isActive()
         );
-    }
+    } //pending
 }

@@ -129,7 +129,7 @@ contract DBOImplementation is ReentrancyGuard, Initializable {
             startAmount: _startedBorrowAmount
         });
         factoryContract = msg.sender;
-    }
+    } //pending
     /**
      * @dev Accepts the borrow offer -- only callable from Aggregator
      * @param amount Amount of the collateral to be accepted
@@ -180,7 +180,7 @@ contract DBOImplementation is ReentrancyGuard, Initializable {
         } else {
             IDBOFactory(factoryContract).emitUpdate(address(this));
         }
-    }
+    } //pending
 
     /**
      * @dev Cancels the borrow offer -- only callable from owner
@@ -215,7 +215,7 @@ contract DBOImplementation is ReentrancyGuard, Initializable {
 
         IDBOFactory(factoryContract).deleteBorrowOrder(address(this));
         IDBOFactory(factoryContract).emitDelete(address(this));
-    }
+    } //pending
 
     function getBorrowInfo() public view returns (BorrowInfo memory) {
         BorrowInfo memory m_borrowInformation = borrowInformation;
@@ -227,7 +227,7 @@ contract DBOImplementation is ReentrancyGuard, Initializable {
             m_borrowInformation.valuableAssetAmount = nftData.lockedAmount;
         }
         return m_borrowInformation;
-    }
+    } //pending
 
     function updateBorrowOrder(
         uint newMaxApr,
@@ -249,5 +249,5 @@ contract DBOImplementation is ReentrancyGuard, Initializable {
 
         borrowInformation = m_borrowInformation;
         IDBOFactory(factoryContract).emitUpdate(address(this));
-    }
+    } //pending
 }
