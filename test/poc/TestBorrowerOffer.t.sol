@@ -93,18 +93,22 @@ contract TestDebitaBorrower is Test {
         mveNFT = new MockveNFT();
         merc20 = new MockERC20("WETH", "WETH");
 
+        //deploy this for the receipt
         veNFTReceipt = new veNFTEqualizer(address(mveNFT), address(merc20));
 
-        oracle = new DebitaChainlink(address(0), address(spider));
+        oracle = new DebitaChainlink(address(0), address(void));
 
         vm.prank(FOUNDRY_DEFAULT);
         dbFactory.setAggregatorContract(address(dAggregator));
+
+        uint256 tokenIdVOid = mveNFT.mint(void);
     }
 
     /*//////////////////////////////////////////////////////////////
                                 FACTORY
     //////////////////////////////////////////////////////////////*/
-    function test_ownerOfBorrowFactory() public {
+
+    function test_OwnerOfBorrowFactory() public {
         //Arrange
         //Act
         address own_er = dbFactory.owner();
@@ -116,9 +120,79 @@ contract TestDebitaBorrower is Test {
         );
     }
 
+    function test_TokenId() public {
+        vm.startPrank(spider);
+        uint256 tokenId = mveNFT.mint(spider);
+        console.log(tokenId);
+    }
+
+    //active borrow offer function testing
     function test_createBorrowOffer() public {
         //Arrange
+
+        vm.startPrank(spider);
+
+        uint256 collateralId = mveNFT.mint(spider);
+        mveNFT.approve(address(dbFactory), collateralId);
+
+        console.log(collateralId);
+
+        bool[] memory oracle = new bool[](1);
+        oracle[0] = false;
+
+        uint[] memory ltv = new uint[](1);
+        ltv[0] = 5000;
+
+        uint maxInterest = 7000;
+        uint duration = 86400; //1 day o 24 hrs
+
+        address[] memory principle = new address[](1);
+        principle[0] = address(merc20);
+
+        address collateral = address(veNFTReceipt);
+
+        bool _isNFT = true;
+
+        uint _receiptId = collateralId;
+
+        address[] memory oracleAddresses = new address[](1);
+        oracleAddresses[0] = address(0);
+
+        uint[] memory ratio = new uint[](1);
+        ratio[0] = 1e18;
+
+        uint collateralAmount = mveNFT.balanceOf(spider);
+
+        console.log("collateral Amount", collateralAmount);
+
         //Act
+
+        address created_borrowAddress = dbFactory.createBorrowOrder(
+            oracle,
+            ltv,
+            maxInterest,
+            duration,
+            principle,
+            collateral,
+            _isNFT,
+            _receiptId,
+            oracleAddresses,
+            ratio,
+            address(0),
+            collateralAmount
+        );
+
+        uint256 balanceOfUserErc20 = merc20.balanceOf(spider);
+        uint256 balancofUserNFT = mveNFT.balanceOf(spider);
+        uint256 balacneOfContract = mveNFT.balanceOf(address(dbFactory));
+
+        console.log(balanceOfUserErc20);
+        console.log(balancofUserNFT);
+        console.log(balacneOfContract);
+
         //Assert
+        // assertEq(dbFactory.activeOrdersCount(), 1,"active Borrow not created");
+        // assertEq(dbFactory.isBorrowOrderLegit(address(created_borrowAddress)), true, "Borrow order if created then should be true");
+        // assertEq(dbFactory.borrowOrderIndex(address(created_borrowAddress)), 1, "Created Borrow order index should be 1");
     }
 }

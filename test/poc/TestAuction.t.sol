@@ -315,4 +315,10 @@ contract TestAuction is Test {
             "The price should have dropped or equal"
         );
     }
+
+    function test_tokeId() public {
+        vm.startPrank(spider);
+        uint256 x = mveNFT.mint(spider);
+        console.log(x);
+    }
 }
