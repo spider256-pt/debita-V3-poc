@@ -133,9 +133,12 @@ contract TestDebitaBorrower is Test {
         vm.startPrank(spider);
 
         uint256 collateralId = mveNFT.mint(spider);
-        mveNFT.approve(address(dbFactory), collateralId);
+        mveNFT.approve(address(veNFTReceipt), collateralId);
 
-        console.log(collateralId);
+        uint[] memory depositArray = new uint[](1);
+        depositArray[0] = collateralId;
+
+        veNFTReceipt.deposit(depositArray);
 
         bool[] memory oracle = new bool[](1);
         oracle[0] = false;
@@ -153,7 +156,8 @@ contract TestDebitaBorrower is Test {
 
         bool _isNFT = true;
 
-        uint _receiptId = collateralId;
+        uint _receiptId = 1;
+        veNFTReceipt.approve(address(dbFactory), _receiptId);
 
         address[] memory oracleAddresses = new address[](1);
         oracleAddresses[0] = address(0);
@@ -161,7 +165,7 @@ contract TestDebitaBorrower is Test {
         uint[] memory ratio = new uint[](1);
         ratio[0] = 1e18;
 
-        uint collateralAmount = mveNFT.balanceOf(spider);
+        uint collateralAmount = 1;
 
         console.log("collateral Amount", collateralAmount);
 
@@ -182,17 +186,25 @@ contract TestDebitaBorrower is Test {
             collateralAmount
         );
 
-        uint256 balanceOfUserErc20 = merc20.balanceOf(spider);
-        uint256 balancofUserNFT = mveNFT.balanceOf(spider);
-        uint256 balacneOfContract = mveNFT.balanceOf(address(dbFactory));
+        // uint256 balanceOfUserErc20 = merc20.balanceOf(spider);
+        // uint256 balancofUserNFT = mveNFT.balanceOf(spider);
+        // uint256 balacneOfContract = mveNFT.balanceOf(address(dbFactory));
 
-        console.log(balanceOfUserErc20);
-        console.log(balancofUserNFT);
-        console.log(balacneOfContract);
+        // console.log(balanceOfUserErc20);
+        // console.log(balancofUserNFT);
+        // console.log(balacneOfContract);
 
         //Assert
-        // assertEq(dbFactory.activeOrdersCount(), 1,"active Borrow not created");
-        // assertEq(dbFactory.isBorrowOrderLegit(address(created_borrowAddress)), true, "Borrow order if created then should be true");
-        // assertEq(dbFactory.borrowOrderIndex(address(created_borrowAddress)), 1, "Created Borrow order index should be 1");
+        assertEq(dbFactory.activeOrdersCount(), 1, "active Borrow not created");
+        assertEq(
+            dbFactory.isBorrowOrderLegit(address(created_borrowAddress)),
+            true,
+            "Borrow order if created then should be true"
+        );
+        assertEq(
+            dbFactory.borrowOrderIndex(address(created_borrowAddress)),
+            0,
+            "Created Borrow order index should be 1"
+        );
     }
 }
