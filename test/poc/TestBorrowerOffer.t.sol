@@ -105,6 +105,59 @@ contract TestDebitaBorrower is Test {
     }
 
     /*//////////////////////////////////////////////////////////////
+                                MODIFIER
+    //////////////////////////////////////////////////////////////*/
+
+    modifier createBorrow() {
+        vm.startPrank(spider);
+
+        uint256 collateralId = mveNFT.mint(spider);
+        mveNFT.approve(address(veNFTReceipt), collateralId);
+
+        uint[] memory deposit_nft = new uint[](1);
+        deposit_nft[0] = collateralId;
+        veNFTReceipt.deposit(deposit_nft);
+
+        bool[] memory oracle = new bool[](1);
+        oracle[0] = false;
+        uint[] memory ltv = new uint[](1);
+        ltv[0] = 5000;
+        uint maxTinterest = 7000;
+        uint duration = 86400;
+
+        address[] memory acceptedPrinciple = new address[](1);
+        acceptedPrinciple[0] = address(merc20);
+        address _collateral = address(mveNFT);
+        bool _isNFT = true;
+        uint _receiptId = 1;
+        address[] memory oracle_prin = new address[](1);
+        oracle_prin[0] = address(0);
+        uint[] memory ratio = new uint[](0);
+        ratio[0] = 1e18;
+        veNFTReceipt.approve(address(dbFactory), _receiptId);
+
+        address _orcaleId_collateral = address(0);
+        uint collateralAmount = 1;
+
+        dbFactory.createBorrowOrder(
+            oracle,
+            ltv,
+            maxTinterest,
+            duration,
+            acceptedPrinciple,
+            _collateral,
+            _isNFT,
+            _receiptId,
+            oracle_prin,
+            ratio,
+            _orcaleId_collateral,
+            collateralAmount
+        );
+        _;
+        vm.stopPrank();
+    }
+
+    /*//////////////////////////////////////////////////////////////
                                 FACTORY
     //////////////////////////////////////////////////////////////*/
 
@@ -205,6 +258,143 @@ contract TestDebitaBorrower is Test {
             dbFactory.borrowOrderIndex(address(created_borrowAddress)),
             0,
             "Created Borrow order index should be 1"
+        );
+        assertEq(
+            veNFTReceipt.balanceOf(created_borrowAddress),
+            1,
+            "Balance of created Address should be 1"
+        );
+    }
+
+    function test_RevertIfTheCollateralIsNotAnNFT() public {
+        //Arrange
+        vm.startPrank(spider);
+
+        uint256 collateralId = mveNFT.mint(spider);
+        mveNFT.approve(address(veNFTReceipt), collateralId);
+
+        uint[] memory depositArray = new uint[](1);
+        depositArray[0] = collateralId;
+
+        veNFTReceipt.deposit(depositArray);
+
+        bool[] memory oracle = new bool[](1);
+        oracle[0] = false;
+
+        uint[] memory ltv = new uint[](1);
+        ltv[0] = 5000;
+
+        uint maxInterest = 7000;
+        uint duration = 86400; //1 day o 24 hrs
+
+        address[] memory principle = new address[](1);
+        principle[0] = address(merc20);
+
+        address collateral = address(merc20);
+
+        bool _isNFT = true;
+
+        uint _receiptId = 1;
+        veNFTReceipt.approve(address(dbFactory), _receiptId);
+
+        address[] memory oracleAddresses = new address[](1);
+        oracleAddresses[0] = address(0);
+
+        uint[] memory ratio = new uint[](1);
+        ratio[0] = 1e18;
+
+        uint collateralAmount = 1;
+
+        console.log("collateral Amount", collateralAmount);
+
+        //Act
+
+        vm.expectRevert();
+        address created_borrowAddress = dbFactory.createBorrowOrder(
+            oracle,
+            ltv,
+            maxInterest,
+            duration,
+            principle,
+            collateral,
+            _isNFT,
+            _receiptId,
+            oracleAddresses,
+            ratio,
+            address(0),
+            collateralAmount
+        );
+        //Assert
+        assertEq(
+            dbFactory.activeOrdersCount(),
+            0,
+            "The order should not exist"
+        );
+        vm.stopPrank();
+    }
+
+    function test_RevertIfIsNFTisFalse() public {
+        //Arrange
+        vm.startPrank(spider);
+
+        uint256 collateralId = mveNFT.mint(spider);
+        mveNFT.approve(address(veNFTReceipt), collateralId);
+
+        uint[] memory depositArray = new uint[](1);
+        depositArray[0] = collateralId;
+
+        veNFTReceipt.deposit(depositArray);
+
+        bool[] memory oracle = new bool[](1);
+        oracle[0] = false;
+
+        uint[] memory ltv = new uint[](1);
+        ltv[0] = 5000;
+
+        uint maxInterest = 7000;
+        uint duration = 86400; //1 day o 24 hrs
+
+        address[] memory principle = new address[](1);
+        principle[0] = address(merc20);
+
+        address collateral = address(veNFTReceipt);
+
+        bool _isNFT = false;
+
+        uint _receiptId = 1;
+        veNFTReceipt.approve(address(dbFactory), _receiptId);
+
+        address[] memory oracleAddresses = new address[](1);
+        oracleAddresses[0] = address(0);
+
+        uint[] memory ratio = new uint[](1);
+        ratio[0] = 1e18;
+
+        uint collateralAmount = 1;
+
+        console.log("collateral Amount", collateralAmount);
+
+        //Act
+
+        vm.expectRevert();
+        address created_borrowAddress = dbFactory.createBorrowOrder(
+            oracle,
+            ltv,
+            maxInterest,
+            duration,
+            principle,
+            collateral,
+            _isNFT,
+            _receiptId,
+            oracleAddresses,
+            ratio,
+            address(0),
+            collateralAmount
+        );
+        assertEq(
+            dbFactory.activeOrdersCount(),
+            0,
+            "The order should not exist"
         );
     }
 }
