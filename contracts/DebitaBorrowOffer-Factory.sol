@@ -154,7 +154,7 @@ contract DBOFactory {
             true
         );
         return address(borrowOffer);
-    } //pending
+    } //done
 
     /**
      * @dev Deletes Borrow Order from index -- only callable from borrow Orders
