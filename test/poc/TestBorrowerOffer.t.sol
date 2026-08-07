@@ -55,6 +55,8 @@ contract TestDebitaBorrower is Test {
     address spider = makeAddr("spider");
     address void = makeAddr("void");
 
+    address public randomAddress = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
+
     address constant FOUNDRY_DEFAULT =
         0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
 
@@ -526,4 +528,141 @@ contract TestDebitaBorrower is Test {
         );
         assertEq(finalActiveBorrowOrder, address(0), "Should be address zero");
     }
+
+    function test_RevertIfaOrderisDeletedTwice() public createBorrow {
+        //Arrange
+        uint256 initialNumberOfActiveOrders = dbFactory.activeOrdersCount();
+        uint256 initialBorrowerIndex = dbFactory.borrowOrderIndex(
+            address(createdOrder)
+        );
+        bool IntialLegitness = dbFactory.isBorrowOrderLegit(
+            address(createdOrder)
+        );
+        address ActiveBorrowOrder = dbFactory.allActiveBorrowOrders(
+            initialBorrowerIndex
+        );
+
+        uint256 finalNumberOfActiveOrders;
+        uint256 finalBorrowerIndex;
+        bool finalLegitness;
+        address finalActiveBorrowOrder;
+        //Act
+        vm.startPrank(address(createdOrder));
+        dbFactory.deleteBorrowOrder(address(createdOrder));
+        vm.stopPrank();
+
+        finalNumberOfActiveOrders = dbFactory.activeOrdersCount();
+
+        finalBorrowerIndex = dbFactory.borrowOrderIndex(address(createdOrder));
+
+        finalLegitness = dbFactory.isBorrowOrderLegit(address(createdOrder));
+
+        finalActiveBorrowOrder = dbFactory.allActiveBorrowOrders(
+            initialBorrowerIndex
+        );
+
+        //Assert
+        assertEq(
+            initialNumberOfActiveOrders,
+            1,
+            "The Initial active oders should be 1"
+        );
+        assertEq(initialBorrowerIndex, 0, "The initial should be 0");
+        assertEq(IntialLegitness, true, "Should be True if exists");
+        assertEq(ActiveBorrowOrder, address(createdOrder), "Should be same");
+
+        assertEq(
+            finalNumberOfActiveOrders,
+            0,
+            "Number of active orders should be 0"
+        );
+        assertEq(
+            finalLegitness,
+            true,
+            "Should be true as it was a legit Order"
+        );
+        assertEq(finalActiveBorrowOrder, address(0), "Should be address zero");
+
+        vm.expectRevert();
+        vm.startPrank(address(createdOrder));
+        dbFactory.deleteBorrowOrder(address(createdOrder));
+        vm.stopPrank();
+    }
+
+    function test_RevertIfNonOrderDeletesTheOrder() public createBorrow {
+        //Arrange
+        uint256 initialNumberOfActiveOrders = dbFactory.activeOrdersCount();
+        uint256 initialBorrowerIndex = dbFactory.borrowOrderIndex(
+            address(createdOrder)
+        );
+        bool IntialLegitness = dbFactory.isBorrowOrderLegit(
+            address(createdOrder)
+        );
+        address ActiveBorrowOrder = dbFactory.allActiveBorrowOrders(
+            initialBorrowerIndex
+        );
+
+        uint256 finalNumberOfActiveOrders;
+        uint256 finalBorrowerIndex;
+        bool finalLegitness;
+        address finalActiveBorrowOrder;
+        //Act
+
+        vm.startPrank(randomAddress);
+        vm.expectRevert();
+        dbFactory.deleteBorrowOrder(address(createdOrder));
+        vm.stopPrank();
+
+        //Assert
+        assertEq(
+            initialNumberOfActiveOrders,
+            1,
+            "The Initial active oders should be 1"
+        );
+        assertEq(initialBorrowerIndex, 0, "The initial should be 0");
+        assertEq(IntialLegitness, true, "Should be True if exists");
+        assertEq(ActiveBorrowOrder, address(createdOrder), "Should be same");
+
+        assertEq(
+            dbFactory.isBorrowOrderLegit(randomAddress),
+            false,
+            "as its just some random address"
+        );
+    }
+
+    function test_RevertIfOrderTriesToDeleteA_NonOrder() public createBorrow {
+        //Arrange
+        uint256 initialNumberOfActiveOrders = dbFactory.activeOrdersCount();
+        uint256 initialBorrowerIndex = dbFactory.borrowOrderIndex(
+            address(createdOrder)
+        );
+        bool IntialLegitness = dbFactory.isBorrowOrderLegit(
+            address(createdOrder)
+        );
+        address ActiveBorrowOrder = dbFactory.allActiveBorrowOrders(
+            initialBorrowerIndex
+        );
+
+        //Act
+        vm.startPrank(createdOrder);
+        dbFactory.deleteBorrowOrder(randomAddress);
+        vm.stopPrank();
+
+        //Assert
+        assertEq(
+            initialNumberOfActiveOrders,
+            1,
+            "The Initial active oders should be 1"
+        );
+        assertEq(initialBorrowerIndex, 0, "The initial should be 0");
+        assertEq(IntialLegitness, true, "Should be True if exists");
+        assertEq(ActiveBorrowOrder, address(createdOrder), "Should be same");
+
+        assertEq(
+            dbFactory.isBorrowOrderLegit(randomAddress),
+            false,
+            "as its just some random address"
+        );
+        assertEq(dbFactory.activeOrdersCount(), 1, "Count should remain 1");
+    } //A CreatedOrder can delete it self by by calling a random address.
 }
