@@ -196,7 +196,7 @@ contract DBOFactory {
             result[i] = borrowInfo;
         }
         return result;
-    } //pending
+    } //done
 
     function setAggregatorContract(address _aggregatorContract) external {
         require(aggregatorContract == address(0), "Already set");

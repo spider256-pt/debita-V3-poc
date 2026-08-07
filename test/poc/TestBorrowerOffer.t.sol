@@ -39,6 +39,8 @@ contract TestDebitaBorrower is Test {
     MockERC20 merc20;
     DebitaV3Aggregator dAggregator;
 
+    address public createdOrder;
+
     //oracle
     DebitaChainlink oracle;
 
@@ -127,19 +129,20 @@ contract TestDebitaBorrower is Test {
 
         address[] memory acceptedPrinciple = new address[](1);
         acceptedPrinciple[0] = address(merc20);
-        address _collateral = address(mveNFT);
+
+        address _collateral = address(veNFTReceipt);
         bool _isNFT = true;
         uint _receiptId = 1;
         address[] memory oracle_prin = new address[](1);
         oracle_prin[0] = address(0);
-        uint[] memory ratio = new uint[](0);
+        uint[] memory ratio = new uint[](1);
         ratio[0] = 1e18;
         veNFTReceipt.approve(address(dbFactory), _receiptId);
 
         address _orcaleId_collateral = address(0);
         uint collateralAmount = 1;
 
-        dbFactory.createBorrowOrder(
+        createdOrder = dbFactory.createBorrowOrder(
             oracle,
             ltv,
             maxTinterest,
@@ -465,9 +468,62 @@ contract TestDebitaBorrower is Test {
         vm.stopPrank();
     }
 
+    function test_countCreateOdersModifier() public createBorrow {
+        console.log("countActiveOrders", dbFactory.activeOrdersCount());
+    }
+
     function test_deleteBorrowOrder() public createBorrow {
         //Arrange
+        uint256 initialNumberOfActiveOrders = dbFactory.activeOrdersCount();
+        uint256 initialBorrowerIndex = dbFactory.borrowOrderIndex(
+            address(createdOrder)
+        );
+        bool IntialLegitness = dbFactory.isBorrowOrderLegit(
+            address(createdOrder)
+        );
+        address ActiveBorrowOrder = dbFactory.allActiveBorrowOrders(
+            initialBorrowerIndex
+        );
+
+        uint256 finalNumberOfActiveOrders;
+        uint256 finalBorrowerIndex;
+        bool finalLegitness;
+        address finalActiveBorrowOrder;
         //Act
+        vm.startPrank(address(createdOrder));
+        dbFactory.deleteBorrowOrder(address(createdOrder));
+        vm.stopPrank();
+
+        finalNumberOfActiveOrders = dbFactory.activeOrdersCount();
+
+        finalBorrowerIndex = dbFactory.borrowOrderIndex(address(createdOrder));
+
+        finalLegitness = dbFactory.isBorrowOrderLegit(address(createdOrder));
+
+        finalActiveBorrowOrder = dbFactory.allActiveBorrowOrders(
+            initialBorrowerIndex
+        );
+
         //Assert
+        assertEq(
+            initialNumberOfActiveOrders,
+            1,
+            "The Initial active oders should be 1"
+        );
+        assertEq(initialBorrowerIndex, 0, "The initial should be 0");
+        assertEq(IntialLegitness, true, "Should be True if exists");
+        assertEq(ActiveBorrowOrder, address(createdOrder), "Should be same");
+
+        assertEq(
+            finalNumberOfActiveOrders,
+            0,
+            "Number of active orders should be 0"
+        );
+        assertEq(
+            finalLegitness,
+            true,
+            "Should be true as it was a legit Order"
+        );
+        assertEq(finalActiveBorrowOrder, address(0), "Should be address zero");
     }
 }
