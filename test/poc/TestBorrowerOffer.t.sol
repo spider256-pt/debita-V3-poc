@@ -665,4 +665,15 @@ contract TestDebitaBorrower is Test {
         );
         assertEq(dbFactory.activeOrdersCount(), 1, "Count should remain 1");
     } //A CreatedOrder can delete it self by by calling a random address.
+
+    function test_getActiveBorrowOrders() public createBorrow {
+        //Arrange
+        //Act
+        DBOImplementation.BorrowInfo[] memory result = dbFactory
+            .getActiveBorrowOrders(0, 1);
+        //Assert
+        assertEq(result[0].owner, spider, "Owner should be spider");
+        assertEq(result[0].isNFT, true, "Should be true");
+        assertEq(result[0].availableAmount, 1, "Available amount should be 1");
+    }
 }

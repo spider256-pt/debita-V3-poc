@@ -174,7 +174,7 @@ contract DBOFactory {
         // switch index of the last borrow order to the deleted borrow order
         borrowOrderIndex[allActiveBorrowOrders[index]] = index;
         activeOrdersCount--;
-    } //pendiing
+    } //done
 
     function getActiveBorrowOrders(
         uint offset,
@@ -196,7 +196,7 @@ contract DBOFactory {
             result[i] = borrowInfo;
         }
         return result;
-    } //done
+    } //pending
 
     function setAggregatorContract(address _aggregatorContract) external {
         require(aggregatorContract == address(0), "Already set");

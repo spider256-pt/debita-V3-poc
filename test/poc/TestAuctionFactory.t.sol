@@ -223,7 +223,7 @@ contract TestAuctionFactory is Test {
     }
 
     /**
-     * @dev test changeOwner byt changing the visibility of owner state or vm.lead can also be used
+     * @dev test changeOwner byt changing the visibility of owner state or vm.load can also be used
      */
     // function testChangeOwner() public {
     //     vm.startPrank(spider);
